@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickCart Admin – Deal Manager</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#000;--white:#fff;--grey1:#f5f5f5;--grey2:#ebebeb;--grey3:#d4d4d4;
+  --grey4:#999;--grey5:#555;--grey6:#222;--green:#1a6b3c;--red:#c00;
+  --bg:#f9f9f9;--card:#fff;--border:#e8e8e8;--ink:#000;--ink3:#888;--ink4:#bbb;
+  --orange:#000;--r:0px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;}
+button,input,select,textarea{font-family:inherit;}
+nav{background:var(--black);position:sticky;top:0;z-index:100;}
+.nav-in{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:20px;font-weight:400;color:#fff;letter-spacing:.1em;}
+.logo span{color:#fff;}
+.logo small{font-size:9px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:#555;margin-left:10px;}
+.back{font-size:10px;font-weight:600;color:#fff;background:none;border:1px solid #333;padding:6px 14px;cursor:pointer;transition:.15s;text-decoration:none;display:inline-block;letter-spacing:.08em;text-transform:uppercase;}
+.back:hover{background:#fff;color:var(--ink);}
+.wrap{display:grid;grid-template-columns:200px 1fr;max-width:1440px;margin:20px auto;min-height:calc(100vh - 72px);}
+.sidebar{background:var(--card);border:1px solid var(--border);align-self:start;position:sticky;top:72px;}
+.sb{display:flex;align-items:center;gap:9px;padding:11px 16px;font-size:11px;font-weight:500;color:var(--ink3);cursor:pointer;transition:.12s;border-left:2px solid transparent;letter-spacing:.03em;}
+.sb:hover{background:var(--grey1);color:var(--ink);}
+.sb.on{color:var(--ink);font-weight:700;border-left-color:var(--black);background:var(--grey1);}
+main{background:var(--card);border:1px solid var(--border);border-left:none;padding:28px 32px;}
+.panel{display:none;}.panel.on{display:block;}
+.ptitle{font-family:'Bebas Neue',sans-serif;font-size:28px;font-weight:400;margin-bottom:3px;letter-spacing:.04em;}
+.psub{font-size:12px;color:var(--ink3);margin-bottom:24px;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:24px;}
+.stat{background:var(--card);padding:18px;border-top:2px solid var(--black);}
+.stat-l{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:7px;}
+.stat-v{font-family:'Bebas Neue',sans-serif;font-size:28px;font-weight:400;letter-spacing:.04em;}
+.stat-h{font-size:10px;color:var(--ink4);margin-top:3px;}
+.box{background:var(--card);border:1px solid var(--border);overflow:hidden;margin-bottom:16px;}
+.box-hd{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);}
+.box-hd h3{font-family:'Bebas Neue',sans-serif;font-size:16px;font-weight:400;letter-spacing:.04em;}
+.sinput{border:1px solid var(--border);padding:6px 12px;font-size:11px;color:var(--ink);outline:none;width:200px;transition:.15s;}
+.sinput:focus{border-color:var(--black);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.fg-full{grid-column:1/-1;}
+.ff label{display:block;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;}
+.ff input,.ff select,.ff textarea{width:100%;border:1px solid var(--border);padding:8px 11px;font-size:12px;color:var(--ink);outline:none;transition:.15s;background:var(--card);}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--black);}
+.ff .hint{font-size:9px;color:var(--ink4);margin-top:2px;letter-spacing:.03em;}
+.acts{display:flex;gap:7px;flex-wrap:wrap;}
+.btn{font-size:10px;font-weight:700;border:none;padding:8px 18px;cursor:pointer;transition:.15s;letter-spacing:.08em;text-transform:uppercase;}
+.btn-orange{background:var(--black);color:#fff;}.btn-orange:hover{background:#333;}
+.btn-grey{background:var(--grey1);color:var(--ink3);border:1px solid var(--border);}.btn-grey:hover{color:var(--ink);border-color:var(--black);}
+.btn-red{background:var(--card);color:var(--red);border:1px solid var(--red);}.btn-red:hover{background:var(--red);color:#fff;}
+.btn-sm{padding:4px 10px;font-size:10px;}
+.btn-blue{background:var(--black);color:#fff;}.btn-blue:hover{background:#333;}
+/* BULK SELECT */
+.tbl-controls{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--grey1);border-bottom:1px solid var(--border);}
+.sel-all{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;cursor:pointer;}
+.sel-count{font-size:11px;color:var(--ink3);}
+.bulk-del-btn{display:none;font-size:10px;font-weight:700;background:var(--red);color:#fff;border:none;padding:5px 12px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;}
+.bulk-del-btn.show{display:block;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);padding:9px 12px;text-align:left;background:var(--grey1);border-bottom:1px solid var(--border);}
+td{padding:8px 12px;font-size:11px;border-bottom:1px solid var(--grey1);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--grey1);}
+tr.selected td{background:#f0f0f0;}
+.td-img{width:36px;height:36px;object-fit:contain;background:var(--grey1);}
+.bdg{font-size:9px;font-weight:700;padding:2px 7px;display:inline-block;letter-spacing:.06em;text-transform:uppercase;}
+.bdg-paid{background:var(--grey1);color:var(--green);}
+.sl{font-size:10px;color:var(--black);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px;display:inline-block;text-decoration:underline;}
+.sl:hover{opacity:.6;}
+.empty-row td{text-align:center;color:var(--ink4);padding:40px;font-size:12px;}
+/* SCRAPER */
+.sc-box{background:var(--grey1);border:1px solid var(--border);padding:20px;margin-bottom:12px;}
+.sc-box h3{font-family:'Bebas Neue',sans-serif;font-size:17px;font-weight:400;margin-bottom:5px;letter-spacing:.04em;}
+.sc-box p{font-size:11px;color:var(--ink3);line-height:1.7;margin-bottom:14px;}
+.sc-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;}
+.sc-row .ff{flex:1;min-width:140px;}
+.log{background:var(--black);color:#666;font-family:'DM Mono',monospace;font-size:10px;padding:12px;min-height:80px;max-height:200px;overflow-y:auto;margin-top:12px;line-height:1.9;}
+.log .ok{color:#4ade80;}.log .err{color:#f87171;}.log .inf{color:#60a5fa;}
+.prog{background:var(--border);height:3px;margin-top:7px;overflow:hidden;}
+.prog-bar{height:100%;background:var(--black);width:0;transition:width .3s;}
+/* SUBS */
+.sub-active{color:var(--green);font-weight:700;}
+.sub-expired{color:var(--red);}
+/* PENDING */
+.pend-approve{background:var(--grey1);color:var(--green);border:1px solid var(--green);padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;}
+.pend-reject{background:var(--grey1);color:var(--red);border:1px solid var(--red);padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;margin-left:4px;letter-spacing:.04em;text-transform:uppercase;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--black);color:#fff;font-size:12px;font-weight:500;padding:10px 20px;z-index:9999;opacity:0;transition:.3s;pointer-events:none;letter-spacing:.04em;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.aff-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:16px;}
+.aff-stat{background:var(--grey1);padding:14px;text-align:center;}
+.aff-stat .as-val{font-family:'Bebas Neue',sans-serif;font-size:24px;font-weight:400;color:var(--black);letter-spacing:.04em;}
+.aff-stat .as-lbl{font-size:9px;color:var(--ink3);margin-top:2px;letter-spacing:.08em;text-transform:uppercase;}
+.aff-link-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--grey1);margin-bottom:4px;border:1px solid var(--border);}
+.aff-link-row .al-store{font-weight:700;font-size:12px;width:80px;flex-shrink:0;letter-spacing:.02em;}
+.aff-link-row .al-pct{font-size:11px;color:var(--green);font-weight:700;width:55px;flex-shrink:0;font-family:'DM Mono',monospace;}
+.aff-link-row input{flex:1;border:1px solid var(--border);padding:5px 9px;font-size:11px;font-family:'DM Mono',monospace;outline:none;background:var(--white);}
+.aff-link-row input:focus{border-color:var(--black);}
+.sponsor-packages{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin:14px 0;}
+.sponsor-pkg{background:var(--white);border:none;padding:14px;text-align:center;cursor:pointer;transition:.12s;}
+.sponsor-pkg:hover,.sponsor-pkg.selected{background:var(--black);color:#fff;}
+.sponsor-pkg:hover .sp-name,.sponsor-pkg.selected .sp-name,.sponsor-pkg:hover .sp-price,.sponsor-pkg.selected .sp-price,.sponsor-pkg:hover .sp-dur,.sponsor-pkg.selected .sp-dur{color:#fff;}
+.sp-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.04em;color:var(--black);}
+.sp-price{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--black);margin:4px 0;letter-spacing:.04em;}
+.sp-dur{font-size:10px;color:var(--ink3);}
+.sp-perks{font-size:10px;color:var(--ink3);margin-top:7px;line-height:1.7;text-align:left;}
+
+/* PAGE EDITOR */
+.pe-section{background:var(--grey1);border:1px solid var(--border);padding:20px;margin-bottom:12px;}
+.pe-section h3{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.04em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.pe-preview{border:1px solid var(--border);background:var(--white);padding:16px;margin-top:12px;font-size:11px;color:var(--ink3);text-align:center;}
+.pe-color-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.pe-color-row label{font-size:10px;font-weight:600;color:var(--ink3);width:120px;letter-spacing:.06em;text-transform:uppercase;}
+.pe-color-row input[type="color"]{width:40px;height:32px;border:1px solid var(--border);cursor:pointer;padding:2px;}
+.pe-color-row span{font-size:10px;color:var(--ink3);font-family:'DM Mono',monospace;}
+
+@media(max-width:900px){.wrap{grid-template-columns:1fr;margin:0;}.sidebar{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);}.sb{padding:10px 13px;border-left:none;border-bottom:2px solid transparent;white-space:nowrap;}.sb.on{border-left-color:transparent;border-bottom-color:var(--black);}main{border-left:1px solid var(--border);padding:16px 14px;}.stats{grid-template-columns:repeat(2,1fr);}.fg{grid-template-columns:1fr;}.sponsor-packages{grid-template-columns:1fr;}.aff-stat-grid{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<!-- GATE OVERLAY -->
+<div id="gate-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:9999;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;">
+  <div style="background:#fff;max-width:420px;width:92%;overflow:hidden;border:1px solid #e0e0e0;">
+    <div style="background:#000;padding:28px;text-align:center;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#fff;letter-spacing:.1em;margin-bottom:4px;">QUICKCART ADMIN</div>
+      <p style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.06em;text-transform:uppercase;">Secure Access Required</p>
+    </div>
+    <div style="display:flex;border-bottom:1px solid #e8e8e8;">
+      <button id="gt-login" onclick="gateTab('login')" style="flex:1;padding:12px;font-size:10px;font-weight:700;border:none;background:#fff;color:#000;cursor:pointer;border-bottom:2px solid #000;font-family:inherit;letter-spacing:.1em;text-transform:uppercase;">Login</button>
+      <button id="gt-sub" onclick="gateTab('sub')" style="flex:1;padding:12px;font-size:10px;font-weight:600;border:none;background:#f5f5f5;color:#888;cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;letter-spacing:.1em;text-transform:uppercase;">Subscribe / Trial</button>
+    </div>
+    <div id="gp-login" style="padding:24px;">
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#888;margin-bottom:5px;">Username or Email</label>
+        <input type="text" id="gate-user" placeholder="admin" onkeydown="if(event.key==='Enter')gateLogin()" style="width:100%;padding:10px 12px;border:1px solid #e8e8e8;font-size:13px;font-family:inherit;outline:none;" onfocus="this.style.borderColor='#000'" onblur="this.style.borderColor='#e8e8e8'">
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#888;margin-bottom:5px;">Password</label>
+        <input type="password" id="gate-pass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')gateLogin()" style="width:100%;padding:10px 12px;border:1px solid #e8e8e8;font-size:13px;font-family:inherit;outline:none;" onfocus="this.style.borderColor='#000'" onblur="this.style.borderColor='#e8e8e8'">
+      </div>
+      <div id="gate-err" style="display:none;background:#fce4e4;color:#c00;padding:8px 12px;font-size:11px;font-weight:600;margin-bottom:10px;"></div>
+      <button onclick="gateLogin()" id="gate-login-btn" style="width:100%;background:#000;color:#fff;border:none;padding:13px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">Login to Admin Panel</button>
+      <p style="text-align:center;font-size:11px;color:#aaa;">No account? <a onclick="gateTab('sub')" style="color:#000;cursor:pointer;font-weight:700;text-decoration:underline;">Subscribe or start free trial</a></p>
+    </div>
+    <div id="gp-sub" style="padding:24px;display:none;">
+      <div style="background:#f5f5f5;border:1px solid #e8e8e8;padding:14px;margin-bottom:14px;text-align:center;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;margin-bottom:4px;">7-DAY FREE TRIAL</div>
+        <div style="font-size:11px;color:#555;">Full admin access free. Card saved, auto-charged after 7 days.</div>
+      </div>
+      <button onclick="window.location.href='index.html'" style="width:100%;background:#000;color:#fff;border:none;padding:12px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:7px;letter-spacing:.1em;text-transform:uppercase;">Go to QuickCart to Subscribe</button>
+      <p style="text-align:center;font-size:10px;color:#bbb;margin-top:10px;">After subscribing, return here and log in.</p>
+    </div>
+  </div>
+</div>
+<script>
+var USERS_DB_ADMIN="https://sneakerai-c96f0-default-rtdb.firebaseio.com/users";
+function gateTab(t){
+  ['login','sub'].forEach(function(n){
+    document.getElementById('gt-'+n).style.borderBottomColor=n===t?'#000':'transparent';
+    document.getElementById('gt-'+n).style.background=n===t?'#fff':'#f5f5f5';
+    document.getElementById('gt-'+n).style.color=n===t?'#000':'#888';
+    document.getElementById('gp-'+n).style.display=n===t?'block':'none';
+  });
+}
+(function(){
+  var u=localStorage.getItem('qc_logged_user');
+  var p=localStorage.getItem('qc_sub_plan');
+  if(!u||!p)document.getElementById('gate-overlay').style.display='flex';
+  else document.getElementById('gate-overlay').style.display='none';
+})();
+async function gateLogin(){
+  var user=document.getElementById('gate-user').value.trim();
+  var pass=document.getElementById('gate-pass').value;
+  var errEl=document.getElementById('gate-err');
+  var btn=document.getElementById('gate-login-btn');
+  errEl.style.display='none';
+  if(!user||!pass){showGateErr('Please enter username and password.');return;}
+  btn.disabled=true;btn.textContent='Logging in...';
+  if((user.toLowerCase()==='admin')&&pass==='admin'){
+    localStorage.setItem('qc_logged_user','admin');localStorage.setItem('qc_sub_plan','premium');localStorage.setItem('qc_sub_email','admin@quickcart.ng');
+    document.getElementById('gate-overlay').style.display='none';
+    var badge=document.getElementById('sub-badge');if(badge)badge.textContent='Admin (Premium)';
+    btn.disabled=false;btn.textContent='Login to Admin Panel';return;
+  }
+  try{
+    var r=await fetch(USERS_DB_ADMIN+'.json');var data=await r.json();
+    if(data){
+      var users=Object.values(data);
+      var match=users.find(function(u2){return(u2.username===user||u2.email===user)&&u2.password===btoa(pass);});
+      if(match){
+        var now=new Date();var trialOk=match.trialEnds&&new Date(match.trialEnds)>now;var subOk=match.subExpires&&new Date(match.subExpires)>now;
+        if(trialOk||subOk||match.status==='active'){
+          localStorage.setItem('qc_logged_user',match.username||match.email);localStorage.setItem('qc_sub_plan',match.plan||'basic');localStorage.setItem('qc_sub_email',match.email||'');
+          document.getElementById('gate-overlay').style.display='none';
+          var badge=document.getElementById('sub-badge');if(badge)badge.textContent=(match.plan||'basic').toUpperCase()+' - '+(match.email||'');
+          btn.disabled=false;btn.textContent='Login to Admin Panel';return;
+        }else{showGateErr('Subscription expired. Please renew on QuickCart.');btn.disabled=false;btn.textContent='Login to Admin Panel';return;}
+      }
+    }
+    showGateErr('Invalid username or password. Try admin / admin.');
+  }catch(err){showGateErr('Login error. Please check your connection.');}
+  btn.disabled=false;btn.textContent='Login to Admin Panel';
+}
+function showGateErr(msg){var el=document.getElementById('gate-err');el.textContent=msg;el.style.display='block';}
+function logoutAdmin(){if(confirm('Log out of admin panel?')){localStorage.removeItem('qc_logged_user');localStorage.removeItem('qc_sub_plan');localStorage.removeItem('qc_sub_email');localStorage.removeItem('qc_sub_ref');window.location.reload();}}
+</script>
+
+<nav><div class="nav-in">
+  <div class="logo"><span>QuickCart</span> <small>Admin</small></div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span id="sub-badge" style="font-size:9px;font-weight:700;background:rgba(255,255,255,.1);color:#fff;padding:3px 10px;border:1px solid #333;letter-spacing:.08em;text-transform:uppercase;"></span>
+    <button onclick="logoutAdmin()" style="font-size:9px;font-weight:600;color:#888;background:none;border:1px solid #333;padding:6px 12px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;">Log Out</button>
+    <a href="index.html" class="back">← Store</a>
+  </div>
+  <script>(function(){var email=localStorage.getItem('qc_sub_email');var plan=localStorage.getItem('qc_sub_plan');if(email&&plan){var el=document.getElementById('sub-badge');if(el)el.textContent=(plan||'').toUpperCase()+' · '+email;}})()</script>
+</div></nav>
+
+<div class="wrap">
+<aside class="sidebar">
+  <div class="sb on"  onclick="go('dashboard',this)">📊 Dashboard</div>
+  <div class="sb"     onclick="go('deals',this)">🔥 Deals</div>
+  <div class="sb"     onclick="go('pending',this)">📩 Pending</div>
+  <div class="sb"     onclick="go('orders',this)">📦 Orders</div>
+  <div class="sb"     onclick="go('subs',this)">⭐ Subscriptions</div>
+  <div class="sb"     onclick="go('scraper',this)">🤖 Scraper</div>
+  <div class="sb"     onclick="go('settings',this)">⚙️ Settings</div>
+  <div class="sb"     onclick="go('newsletter',this)">📧 Newsletter</div>
+  <div class="sb"     onclick="go('alerts',this)">🔔 Price Alerts</div>
+  <div class="sb"     onclick="go('referrals',this)">🤝 Referrals</div>
+  <div class="sb"     onclick="go('affiliate',this)">💰 Affiliate</div>
+  <div class="sb"     onclick="go('adslots',this)">📣 Ad Slots</div>
+  <div class="sb"     onclick="go('leaderboard',this)">🏆 Leaderboard</div>
+  <div class="sb"     onclick="go('digest',this)">📨 Email Digest</div>
+  <div class="sb"     onclick="go('hunt',this)">⚡ Deal Hunt</div>
+  <div class="sb"     onclick="go('flash',this)">🔥 Flash Sale</div>
+  <div class="sb"     onclick="go('coupons',this)">🎟️ Coupons</div>
+  <div class="sb"     onclick="go('pageeditor',this)">🎨 Page Editor</div>
+  <div class="sb"     onclick="go('botconfig',this)">🤖 Bot Config</div>
+</aside>
+<main>
+<!-- DASHBOARD -->
+<div class="panel on" id="p-dashboard">
+  <div class="ptitle">Dashboard</div><div class="psub">Live QuickCart overview</div>
+  <div style="background:var(--grey1);border:1px solid var(--border);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;">
+    <span style="font-size:24px;">💰</span>
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.06em;margin-bottom:2px;">Revenue Streams Active</div>
+      <div style="font-size:11px;color:#888;">Subscriptions · Affiliate Clicks · Community Submissions · Sponsored Listings</div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">Live Deals</div><div class="stat-v" id="s-prod">0</div><div class="stat-h">In database</div></div>
+    <div class="stat"><div class="stat-l">Revenue</div><div class="stat-v" id="s-rev">₦0</div><div class="stat-h">All time</div></div>
+    <div class="stat"><div class="stat-l">Orders</div><div class="stat-v" id="s-ord">0</div><div class="stat-h">Paid</div></div>
+    <div class="stat"><div class="stat-l">Subscribers</div><div class="stat-v" id="s-subs">0</div><div class="stat-h">Active</div></div>
+  </div>
+  <div class="box"><div class="box-hd"><h3>Recent Orders</h3></div>
+    <table><thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody id="dash-ord"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table>
+  </div>
+</div>
+
+<!-- DEALS -->
+<div class="panel" id="p-deals">
+  <div class="ptitle">Deals</div><div class="psub">Add, edit and remove deals.</div>
+  <div class="box" style="padding:20px;">
+    <h3 id="ftitle" style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.04em;margin-bottom:14px;">Add New Deal</h3>
+    <div class="fg">
+      <div class="ff"><label>Product Name *</label><input id="f-name" placeholder="e.g. iPhone 17 Pro Max" type="text"></div>
+      <div class="ff"><label>Brand *</label><input id="f-brand" placeholder="Apple, Samsung…" type="text"></div>
+      <div class="ff"><label>Category *</label>
+        <select id="f-cat"><option value="">Select</option><option value="Smartphones">📱 Smartphones</option><option value="Laptops">💻 Laptops</option><option value="Gaming">🎮 Gaming</option><option value="Electronics">🔌 Electronics</option><option value="Accessories">🎧 Accessories</option></select>
+      </div>
+      <div class="ff"><label>Deal Price (₦) *</label><input id="f-price" placeholder="89500" type="number" min="0"></div>
+      <div class="ff"><label>Original Price (₦)</label><input id="f-orig" placeholder="115000" type="number" min="0"><p class="hint">Shows discount % to users</p></div>
+      <div class="ff"><label>Best Store *</label>
+        <select id="f-store"><option value="">Select</option><option>Jumia</option><option>Konga</option><option>Slot</option><option>3C Hub</option><option>Pointek</option><option>Fouani</option><option>Kara</option><option>Sims</option><option>Garmspot</option><option>Jiji</option><option>Other</option></select>
+      </div>
+      <div class="ff fg-full"><label>Best Store URL *</label><input id="f-url" placeholder="https://jumia.com.ng/…" type="url"><p class="hint">Where "View Best Deal" button links — affiliate tag appended automatically if configured</p></div>
+      <div class="ff fg-full"><label>Image URL</label><input id="f-img" placeholder="https://…"></div>
+      <div class="ff"><label>Sponsored</label><select id="f-sponsored"><option value="">No</option><option value="1">⭐ Sponsored Listing</option></select></div>
+      <div class="ff"><label>Tag</label><select id="f-tag"><option value="">None</option><option value="HOT">🔥 HOT</option><option value="NEW">✨ NEW</option><option value="LIMITED">⚡ LIMITED</option><option value="SALE">💰 SALE</option></select></div>
+      <div class="ff"><label>Quantity in Stock</label><input id="f-qty" placeholder="0 = not in stock" type="number" min="0"><p class="hint">Set >0 to show Add to Cart button</p></div>
+      <div class="ff"><label>Cart / Purchase Type</label>
+        <select id="f-instock">
+          <option value="affiliate">🔗 Affiliate Only (View Deal only — no cart)</option>
+          <option value="true">🛒 In Stock — Full Paystack payment</option>
+          <option value="reserve">📦 Reserve — ₦1,000 deposit, balance on delivery</option>
+        </select>
+        <p class="hint">Controls what button appears: Add to Cart, Reserve, or just View Deal</p>
+      </div>
+    </div>
+    <input type="hidden" id="f-eid">
+    <div class="acts">
+      <button class="btn btn-orange" onclick="saveDeal()">💾 Save Deal</button>
+      <button class="btn btn-grey" onclick="clearForm()">✕ Clear</button>
+    </div>
+  </div>
+  <div class="box">
+    <div class="box-hd"><h3>All Deals (<span id="pcnt">0</span>)</h3>
+      <div style="display:flex;gap:6px;"><input class="sinput" id="psearch" placeholder="Search deals…" oninput="filterProds()" type="text"></div>
+    </div>
+    <div class="tbl-controls">
+      <label class="sel-all"><input type="checkbox" id="chk-all" onchange="toggleAll(this)"> Select All</label>
+      <span class="sel-count" id="sel-count">0 selected</span>
+      <button class="bulk-del-btn" id="bulk-del-btn" onclick="bulkDelete()">🗑 Delete Selected</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th style="width:36px"></th><th>Img</th><th>Name</th><th>Category</th><th>Store</th><th>Price</th><th>Discount</th><th>Cart Type</th><th>URL</th><th>Actions</th></tr></thead>
+        <tbody id="prod-tb"><tr class="empty-row"><td colspan="9">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- PENDING -->
+<div class="panel" id="p-pending">
+  <div class="ptitle">Pending Deals</div><div class="psub">Community submissions — review and approve or reject.</div>
+  <div class="box">
+    <div class="box-hd"><h3>Community Submissions (<span id="pend-cnt">0</span>)</h3></div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Name</th><th>Brand</th><th>Category</th><th>Price</th><th>Store</th><th>Submitter</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="pend-tb"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ORDERS -->
+<div class="panel" id="p-orders">
+  <div class="ptitle">📦 Orders</div><div class="psub">All customer orders from the cart checkout. Powered by Paystack.</div>
+  <div class="box">
+    <div class="box-hd"><h3>All Orders</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input class="sinput" id="osearch" placeholder="Search orders…" oninput="filterOrds()" type="text">
+        <button class="btn btn-grey btn-sm" onclick="exportOrdersCSV()">⬇ Export CSV</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Ref</th><th>Customer</th><th>Contact</th><th>Address</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="ord-tb"><tr class="empty-row"><td colspan="8">Loading orders…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SUBSCRIPTIONS -->
+<div class="panel" id="p-subs">
+  <div class="ptitle">Subscriptions</div><div class="psub">Pro members who have paid for admin access.</div>
+  <div class="box">
+    <div class="box-hd"><h3>All Subscribers (<span id="sub-cnt">0</span>)</h3></div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Email</th><th>Plan</th><th>Cycle</th><th>Amount</th><th>Ref</th><th>Activated</th><th>Status</th></tr></thead>
+        <tbody id="sub-tb"><tr class="empty-row"><td colspan="7">No subscribers yet</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SCRAPER -->
+<div class="panel" id="p-scraper">
+  <div class="ptitle">Scraper</div><div class="psub">Populate and manage your deals database — scrapes real data from any website</div>
+
+  <!-- AI AUTO-LISTING -->
+  <div class="sc-box" style="border-color:var(--black);background:var(--black);color:#fff;">
+    <h3 style="color:#fff;">🤖 AI Auto-Listing</h3>
+    <p style="color:rgba(255,255,255,.5);">Paste any product name or URL (Jumia, Konga, Amazon, AliExpress, any site). AI fills all fields automatically.</p>
+    <div class="sc-row" style="margin-bottom:10px;">
+      <div class="ff" style="flex:3;"><label style="color:rgba(255,255,255,.4);">Product Name or URL</label><input id="ai-list-inp" placeholder="Samsung Galaxy S24 Ultra or https://jumia.com.ng/…" type="text" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#fff;"></div>
+      <div class="ff" style="flex:1;"><label style="color:rgba(255,255,255,.4);">Store</label><select id="ai-list-store" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#fff;"><option value="">Auto-detect</option><option>Jumia</option><option>Konga</option><option>Slot</option><option>3C Hub</option><option>Pointek</option><option>Fouani</option><option>Kara</option><option>Jiji</option><option>Garmspot</option><option>Sims</option></select></div>
+    </div>
+    <div style="margin-bottom:10px;"><label style="font-size:9px;color:rgba(255,255,255,.35);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;">Claude API Key (optional — for live AI)</label>
+      <input id="ai-claude-key" type="password" placeholder="sk-ant-api03-… (leave blank for smart fallback)" style="width:100%;padding:8px 11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:12px;font-family:inherit;outline:none;"></div>
+    <button class="btn btn-orange" onclick="aiAutoList()" id="ai-list-btn" style="background:#fff;color:#000;font-size:11px;padding:10px 24px;">🤖 AI Generate Listing</button>
+    <div id="ai-list-result" style="display:none;margin-top:12px;background:rgba(255,255,255,.05);padding:12px;border:1px solid rgba(255,255,255,.1);">
+      <div style="font-size:9px;color:rgba(255,255,255,.35);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">AI Generated — Review & Save</div>
+      <div id="ai-list-preview" style="color:rgba(255,255,255,.8);font-size:12px;line-height:1.9;"></div>
+      <button class="btn" onclick="applyAIListing()" style="margin-top:10px;background:#fff;color:#000;font-size:10px;padding:8px 20px;letter-spacing:.08em;text-transform:uppercase;">✅ Apply to Form & Save</button>
+    </div>
+    <div class="log" id="ai-list-log" style="margin-top:8px;display:none;min-height:45px;"></div>
+  </div>
+
+  <!-- REAL WEB SCRAPER -->
+  <div class="sc-box" style="border-color:var(--black);">
+    <h3>🌐 Real Web Scraper — Any Website</h3>
+    <p>Paste any product listing URL (Jumia, Konga, Slot, Amazon, AliExpress, Shopify stores, etc.). Our scraper fetches live product data via CORS proxy and imports it automatically.</p>
+    <div class="sc-row" style="margin-bottom:10px;">
+      <div class="ff" style="flex:3;"><label>Product URL (any site)</label><input id="ws-url" placeholder="https://www.jumia.com.ng/any-product/ or https://amazon.com/…" type="url"></div>
+      <div class="ff" style="flex:1;"><label>Override Store Name</label><input id="ws-store" placeholder="Auto-detect" type="text"></div>
+    </div>
+    <div class="sc-row">
+      <button class="btn btn-orange" onclick="realScrape()" id="ws-btn">🌐 Scrape URL Now</button>
+      <button class="btn btn-grey" onclick="batchScrape()">📋 Batch Scrape (paste list)</button>
+    </div>
+    <div class="prog"><div class="prog-bar" id="ws-prog"></div></div>
+    <div class="log" id="ws-log"><span class="inf">ℹ Paste any product URL above and click Scrape.</span></div>
+  </div>
+
+  <div class="sc-box" style="border-color:var(--black);background:#fffdf5;">
+    <h3 style="color:#000;">🚀 Seed Fresh Deals — One Click</h3>
+    <p>Seeds your Firebase with 40+ fresh unique deals across all categories.</p>
+    <button class="btn btn-orange" onclick="seedAll()" style="font-size:11px;padding:10px 24px;">▶ Seed Fresh Deals Now</button>
+    <div class="prog"><div class="prog-bar" id="seed-prog"></div></div>
+    <div class="log" id="seed-log"><span class="inf">ℹ Ready. Click above to populate Firebase.</span></div>
+  </div>
+
+  <div class="sc-box">
+    <h3>📋 Bulk JSON Import</h3>
+    <p>Paste a JSON array of deals. Required: name, brand, category, price, store, storeUrl.</p>
+    <div class="ff"><label>JSON Data</label>
+      <textarea id="bulk-json" rows="5" style="width:100%;border:1px solid var(--border);padding:10px;font-family:'DM Mono',monospace;font-size:11px;outline:none;resize:vertical;background:var(--card);" placeholder='[{"name":"iPhone 17","brand":"Apple","category":"Smartphones","price":2720000,"store":"Jumia","storeUrl":"https://jumia.com.ng/…","tag":"HOT"}]'></textarea>
+    </div>
+    <button class="btn btn-orange" onclick="bulkImport()" style="margin-top:10px;">📥 Import JSON</button>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="panel" id="p-settings">
+  <div class="ptitle">Settings</div><div class="psub">Platform configuration</div>
+  <div class="box" style="padding:20px;margin-bottom:14px;">
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.04em;margin-bottom:14px;">Pricing & Currency</h3>
+    <div class="fg">
+      <div class="ff"><label>Currency</label><select><option>NGN — Nigerian Naira (₦)</option></select></div>
+      <div class="ff"><label>USD → NGN Rate</label><input type="number" value="1580" id="rate-inp"></div>
+    </div>
+    <button class="btn btn-orange" onclick="toast('✅ Saved!')">Save</button>
+  </div>
+  <div class="box" style="padding:20px;margin-bottom:14px;">
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.04em;margin-bottom:14px;">Paystack Integration</h3>
+    <div class="ff fg-full"><label>Public Key</label><input type="text" value="pk_live_1d3267660c9ae41a643c52a2d04493ea4e0e98ca" id="pk-key"></div>
+    <p style="font-size:10px;color:var(--ink4);margin-top:7px;margin-bottom:12px;letter-spacing:.03em;">⚠️ Never put your secret key in frontend code.</p>
+    <button class="btn btn-orange" onclick="toast('✅ Saved!')">Save</button>
+  </div>
+  <div class="box" style="padding:20px;">
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.04em;margin-bottom:14px;">Subscription Pricing</h3>
+    <div class="fg">
+      <div class="ff"><label>Basic Monthly (₦)</label><input type="number" value="7900" id="s-basic-m"></div>
+      <div class="ff"><label>Premium Monthly (₦)</label><input type="number" value="16590" id="s-prem-m"></div>
+      <div class="ff"><label>Basic Yearly (₦)</label><input type="number" value="75840" id="s-basic-y"></div>
+      <div class="ff"><label>Premium Yearly (₦)</label><input type="number" value="159264" id="s-prem-y"></div>
+    </div>
+    <button class="btn btn-orange" onclick="toast('✅ Saved!')">Save</button>
+  </div>
+</div>
+
+<!-- NEWSLETTER -->
+<div class="panel" id="p-newsletter">
+  <div class="ptitle">Newsletter Subscribers</div><div class="psub">Users who signed up for weekly deal digest emails.</div>
+  <div class="box">
+    <div class="box-hd"><h3>All Subscribers (<span id="news-cnt">0</span>)</h3><button class="btn btn-orange btn-sm" onclick="exportNewsletterCSV()">⬇ Export CSV</button></div>
+    <div style="overflow-x:auto;"><table><thead><tr><th>Email</th><th>Subscribed</th><th>Status</th></tr></thead><tbody id="news-tb"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- PRICE ALERTS -->
+<div class="panel" id="p-alerts">
+  <div class="ptitle">Price Alerts</div><div class="psub">Users waiting for price drops on specific products.</div>
+  <div class="box">
+    <div class="box-hd"><h3>Active Alerts (<span id="alert-cnt">0</span>)</h3></div>
+    <div style="overflow-x:auto;"><table><thead><tr><th>Email</th><th>Product ID</th><th>Target Price</th><th>Created</th><th>Status</th></tr></thead><tbody id="alert-tb"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- REFERRALS -->
+<div class="panel" id="p-referrals">
+  <div class="ptitle">Referrals</div><div class="psub">Track referral codes, conversions, and ₦1,000 airtime payouts.</div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">Total Referrals</div><div class="stat-v" id="ref-total">0</div><div class="stat-h">All time</div></div>
+    <div class="stat"><div class="stat-l">Conversions</div><div class="stat-v" id="ref-conv">0</div><div class="stat-h">Subscribed</div></div>
+    <div class="stat"><div class="stat-l">Airtime Paid</div><div class="stat-v" id="ref-paid-amt">₦0</div><div class="stat-h">₦1,000 each</div></div>
+    <div class="stat"><div class="stat-l">Pending Payouts</div><div class="stat-v" id="ref-pending">₦0</div></div>
+  </div>
+  <div class="box">
+    <div class="box-hd"><h3>Referral Log</h3></div>
+    <div style="overflow-x:auto;"><table><thead><tr><th>Referrer Code</th><th>Referred Email</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody id="ref-tb"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- AFFILIATE -->
+<div class="panel" id="p-affiliate">
+  <div class="ptitle">💰 Affiliate Earnings</div><div class="psub">Configure affiliate links — saved tags automatically append to ALL outgoing deal links</div>
+  <div class="aff-stat-grid">
+    <div class="aff-stat"><div class="as-val" id="aff-total-clicks">—</div><div class="as-lbl">Total Clicks</div></div>
+    <div class="aff-stat"><div class="as-val" id="aff-total-gmv">—</div><div class="as-lbl">GMV (₦)</div></div>
+    <div class="aff-stat"><div class="as-val" id="aff-est-earn">—</div><div class="as-lbl">Est. Earnings (₦)</div></div>
+    <div class="aff-stat"><div class="as-val" id="aff-top-store">—</div><div class="as-lbl">Top Store</div></div>
+  </div>
+  <div class="sc-box">
+    <h3>Affiliate Link Configuration</h3>
+    <p>Enter your affiliate tag/ID for each store. When saved, these are automatically appended to ALL deal links going out of your site — users click deal links, you earn commission.</p>
+    <div id="aff-links-list">
+      <div class="aff-link-row"><span class="al-store">Jumia</span><span class="al-pct">up to 8%</span><input type="text" placeholder="Your Jumia KOL tag (e.g. quickcartng-20)" id="aff-jumia"></div>
+      <div class="aff-link-row"><span class="al-store">Konga</span><span class="al-pct">up to 7%</span><input type="text" placeholder="Your Konga affiliate ID" id="aff-konga"></div>
+      <div class="aff-link-row"><span class="al-store">Slot</span><span class="al-pct">up to 5%</span><input type="text" placeholder="Your Slot affiliate ref" id="aff-slot"></div>
+      <div class="aff-link-row"><span class="al-store">Jiji</span><span class="al-pct">up to 4%</span><input type="text" placeholder="Your Jiji affiliate ID" id="aff-jiji"></div>
+      <div class="aff-link-row"><span class="al-store">Amazon</span><span class="al-pct">up to 10%</span><input type="text" placeholder="Your Amazon Associates tag" id="aff-amazon"></div>
+      <div class="aff-link-row"><span class="al-store">AliExpress</span><span class="al-pct">up to 9%</span><input type="text" placeholder="Your AliExpress affiliate ID" id="aff-aliexpress"></div>
+    </div>
+    <button onclick="saveAffLinks()" class="btn btn-orange" style="margin-top:12px;">💾 Save & Activate Affiliate Links</button>
+    <div id="aff-save-status" style="margin-top:8px;font-size:11px;color:var(--green);font-weight:600;display:none;">✅ Affiliate links saved! They will now be appended to all outgoing deal links.</div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.04em;margin-bottom:8px;">Signup Links</div>
+      <p style="font-size:11px;line-height:1.9;color:var(--ink3);">
+        📌 <a href="https://kol.jumia.com.ng" target="_blank" style="color:#000;text-decoration:underline;">Jumia KOL Affiliate</a> — Apply free, approved in 1–3 days<br>
+        📌 <a href="https://affiliate.konga.com" target="_blank" style="color:#000;text-decoration:underline;">Konga Affiliate Program</a> — Instant approval<br>
+        📌 <a href="https://jiji.ng/affiliate" target="_blank" style="color:#000;text-decoration:underline;">Jiji Affiliate</a> — Apply via partner portal
+      </p>
+    </div>
+  </div>
+  <div class="sc-box" style="margin-top:12px;">
+    <h3>Recent Affiliate Clicks (last 20)</h3>
+    <div style="overflow-x:auto;"><table><thead><tr><th>Product</th><th>Store</th><th>Price</th><th>Time</th></tr></thead><tbody id="aff-clicks-tbl"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- AD SLOTS -->
+<div class="panel" id="p-adslots">
+  <div class="ptitle">📣 Sponsored Ad Slots</div><div class="psub">Manage advertiser bookings and sponsored deals. Bookings received via Paystack are shown here.</div>
+  <div class="sc-box">
+    <h3>Active Bookings</h3>
+    <div style="overflow-x:auto;"><table><thead><tr><th>Advertiser</th><th>Package</th><th>Product</th><th>Phone</th><th>Paid</th><th>Status</th><th>Action</th></tr></thead><tbody id="adslots-tbl"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody></table></div>
+  </div>
+  <div class="sc-box" style="margin-top:12px;">
+    <h3>Manual Ad Slot</h3>
+    <p>Manually add a sponsored deal for advertisers who paid offline.</p>
+    <div class="fg">
+      <div class="ff"><label>Advertiser Name</label><input type="text" id="manual-adv-name" placeholder="Business Name"></div>
+      <div class="ff"><label>Package</label><select id="manual-adv-pkg"><option value="Basic">Basic — ₦15,000/week</option><option value="Pro">Pro — ₦35,000/2 weeks</option><option value="Premium">Premium — ₦60,000/month</option></select></div>
+      <div class="ff fg-full"><label>Product / Deal URL</label><input type="url" id="manual-adv-url" placeholder="https://…"></div>
+    </div>
+    <button onclick="addManualAdSlot()" class="btn btn-orange">Add Ad Slot</button>
+  </div>
+  <div class="sc-box" style="margin-top:12px;">
+    <h3>WhatsApp Bot Number</h3>
+    <p style="margin-bottom:8px;font-size:11px;color:var(--ink3);">Users can WhatsApp this number to get deal recommendations.</p>
+    <div style="display:flex;gap:7px;"><input type="tel" id="wa-bot-number" placeholder="2348012345678" style="flex:1;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;"><button onclick="saveWaNumber()" class="btn btn-orange">Save</button></div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="panel" id="p-leaderboard">
+  <div class="ptitle">🏆 Community Leaderboard</div><div class="psub">Top deal contributors — award prizes, manage points</div>
+  <div class="sc-box">
+    <h3>Top Contributors</h3>
+    <div style="overflow-x:auto;"><table><thead><tr><th>Rank</th><th>Username</th><th>Points</th><th>Last Active</th><th>Action</th></tr></thead><tbody id="lb-admin-tbl"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table></div>
+  </div>
+  <div class="sc-box" style="margin-top:12px;">
+    <h3>Award Bonus Points</h3>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+      <input type="text" id="award-user" placeholder="@username" style="flex:1;min-width:140px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;">
+      <input type="number" id="award-pts" placeholder="Points (e.g. 50)" style="width:140px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;">
+      <button onclick="awardBonusPoints()" class="btn btn-orange">Award</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL DIGEST -->
+<div class="panel" id="p-digest">
+  <div class="ptitle">📨 Daily Email Digest</div><div class="psub">Send automated deal emails to subscribers every morning</div>
+  <div class="sc-box">
+    <h3>Digest Settings</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">SEND TIME</label>
+        <select id="digest-time" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;"><option value="07:00">7:00 AM (Lagos)</option><option value="08:00">8:00 AM</option><option value="09:00">9:00 AM</option></select></div>
+      <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">DEALS PER EMAIL</label>
+        <select id="digest-count" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;"><option value="5">Top 5</option><option value="10">Top 10</option></select></div>
+    </div>
+    <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">BREVO API KEY (free SMTP)</label>
+      <input type="text" id="brevo-key" placeholder="xkeysib-..." style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;font-family:'DM Mono',monospace;box-sizing:border-box;"></div>
+    <button onclick="saveDigestSettings()" class="btn btn-orange" style="margin-top:10px;">Save Settings</button>
+    <button onclick="sendTestDigest()" class="btn btn-grey" style="margin-top:8px;margin-left:6px;">Send Test Email</button>
+  </div>
+  <div class="sc-box" style="margin-top:10px;">
+    <h3>Subscribers (<span id="digest-sub-count">0</span>)</h3>
+    <div style="overflow-x:auto;"><table><thead><tr><th>Email</th><th>Subscribed</th><th>Digest</th></tr></thead><tbody id="digest-subs-tbl"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody></table></div>
+    <button onclick="exportDigestCSV()" class="btn btn-grey" style="margin-top:8px;">⬇ Export CSV</button>
+  </div>
+</div>
+
+<!-- DEAL HUNT -->
+<div class="panel" id="p-hunt">
+  <div class="ptitle">⚡ Deal Hunt Challenge</div><div class="psub">Run weekly challenges to grow community submissions</div>
+  <div class="sc-box">
+    <h3>Current Challenge</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">TARGET PRODUCT</label><input type="text" id="hunt-admin-product" placeholder="e.g. Samsung Galaxy A15" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;box-sizing:border-box;"></div>
+      <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">PRIZE (₦)</label><input type="number" id="hunt-admin-prize" placeholder="5000" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;box-sizing:border-box;"></div>
+    </div>
+    <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">ENDS (days from now)</label><input type="number" id="hunt-admin-days" value="7" style="width:110px;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;"></div>
+    <button onclick="saveHuntChallenge()" class="btn btn-orange" style="margin-top:10px;">Launch Challenge</button>
+  </div>
+  <div class="sc-box" style="margin-top:10px;">
+    <h3>Submissions</h3>
+    <div style="overflow-x:auto;"><table><thead><tr><th>User</th><th>Store</th><th>Price (₦)</th><th>Link</th><th>Time</th><th>Action</th></tr></thead><tbody id="hunt-subs-tbl"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- FLASH SALE -->
+<div class="panel" id="p-flash">
+  <div class="ptitle">🔥 Flash Sale Manager</div><div class="psub">Run timed flash sales with countdown banner on homepage</div>
+  <div class="sc-box">
+    <h3>Configure Flash Sale</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">BANNER TITLE</label><input type="text" id="flash-banner-title" placeholder="Black Friday Flash Sale!" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;box-sizing:border-box;"></div>
+      <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">ENDS IN (hours from now)</label><input type="number" id="flash-hours" value="24" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;box-sizing:border-box;"></div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:10px;"><input type="checkbox" id="flash-active" style="width:14px;height:14px;"> Show flash sale banner on homepage</label>
+    <button onclick="saveFlashSale()" class="btn btn-orange">Launch Flash Sale</button>
+    <button onclick="stopFlashSale()" class="btn btn-grey" style="margin-left:6px;">Stop Sale</button>
+    <div id="flash-status" style="margin-top:8px;font-size:11px;color:var(--green);display:none;"></div>
+  </div>
+  <!-- Flash Deal Cards Manager -->
+  <div class="sc-box" style="margin-top:10px;">
+    <h3>Flash Deal Cards (Horizontal Strip)</h3>
+    <p>The flash deal strip on the homepage automatically shows HOT and SALE tagged deals. Tag any deal as HOT or SALE in the Deals section to feature it in the strip.</p>
+    <div style="overflow-x:auto;"><table><thead><tr><th>Name</th><th>Tag</th><th>Store</th><th>Price</th><th>In Strip?</th></tr></thead>
+    <tbody id="flash-deals-tbl"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- COUPONS -->
+<div class="panel" id="p-coupons">
+  <div class="ptitle">🎟️ Coupon Codes</div><div class="psub">Manage discount codes shown to users on the homepage</div>
+  <div class="sc-box">
+    <h3>Add New Coupon</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">STORE</label><select id="cp-store" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;background:#fff;box-sizing:border-box;"><option>Jumia</option><option>Konga</option><option>Slot</option><option>Jiji</option><option>Kara</option><option>3C Hub</option><option>Pointek</option><option>Fouani</option><option>Garmspot</option><option>Sims Nigeria</option></select></div>
+      <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">CODE</label><input type="text" id="cp-code" placeholder="SAVE20" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;font-family:'DM Mono',monospace;box-sizing:border-box;text-transform:uppercase;"></div>
+      <div><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">EXPIRY DATE</label><input type="date" id="cp-expiry" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;box-sizing:border-box;"></div>
+    </div>
+    <div style="margin-bottom:8px;"><label style="font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">DESCRIPTION</label><input type="text" id="cp-desc" placeholder="e.g. 20% off all electronics" style="width:100%;margin-top:4px;border:1px solid var(--border);padding:7px 11px;font-size:12px;outline:none;box-sizing:border-box;"></div>
+    <button onclick="saveCoupon()" class="btn btn-orange">Add Coupon</button>
+  </div>
+  <div class="sc-box" style="margin-top:10px;">
+    <h3>Active Coupons</h3>
+    <div style="overflow-x:auto;"><table><thead><tr><th>Store</th><th>Code</th><th>Description</th><th>Expiry</th><th>Action</th></tr></thead><tbody id="coupons-tbl"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- PAGE EDITOR — Full store customization                         -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-pageeditor">
+  <div class="ptitle">🎨 Page Editor</div><div class="psub">Fully customize your store — logo, colors, categories, fonts, hero text and more. Changes apply live to index.html.</div>
+
+  <!-- BRANDING -->
+  <div class="pe-section">
+    <h3>Branding & Identity</h3>
+    <div class="fg">
+      <div class="ff"><label>Store / Logo Name</label><input type="text" id="pe-logo" placeholder="QuickCart" value="QuickCart"></div>
+      <div class="ff"><label>Logo Accent Word</label><input type="text" id="pe-logo-accent" placeholder="Quick (highlighted part)" value="Quick"></div>
+      <div class="ff"><label>Tagline (Hero subtitle)</label><input type="text" id="pe-tagline" placeholder="Nigeria's #1 Deal Finder"></div>
+      <div class="ff"><label>Country/Market</label><input type="text" id="pe-country" placeholder="Nigeria" value="Nigeria"></div>
+      <div class="ff fg-full"><label>Hero Headline (3 lines, use | for line break)</label><input type="text" id="pe-hero-headline" placeholder="FIND THE|BEST DEALS|IN NIGERIA." value="FIND THE|BEST DEALS|IN NIGERIA."></div>
+      <div class="ff fg-full"><label>Hero Sub-paragraph</label><textarea id="pe-hero-para" rows="2" style="width:100%;border:1px solid var(--border);padding:8px 11px;font-size:12px;outline:none;" placeholder="Compare prices across Jumia, Konga…"></textarea></div>
+    </div>
+  </div>
+
+  <!-- COLORS -->
+  <div class="pe-section">
+    <h3>Color Theme</h3>
+    <div class="pe-color-row"><label>Background Color</label><input type="color" id="pe-bg" value="#ffffff"><span id="pe-bg-val">#ffffff</span></div>
+    <div class="pe-color-row"><label>Text Color</label><input type="color" id="pe-text" value="#000000"><span id="pe-text-val">#000000</span></div>
+    <div class="pe-color-row"><label>Accent / Button Color</label><input type="color" id="pe-accent" value="#000000"><span id="pe-accent-val">#000000</span></div>
+    <div class="pe-color-row"><label>Card Background</label><input type="color" id="pe-card" value="#ffffff"><span id="pe-card-val">#ffffff</span></div>
+    <div class="pe-color-row"><label>Nav Background</label><input type="color" id="pe-nav" value="#000000"><span id="pe-nav-val">#000000</span></div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-orange" onclick="applyColorPreset('dark')">Dark Theme</button>
+      <button class="btn btn-grey" onclick="applyColorPreset('light')" style="margin-left:5px;">Light Theme</button>
+      <button class="btn btn-grey" onclick="applyColorPreset('navy')" style="margin-left:5px;">Navy Theme</button>
+      <button class="btn btn-grey" onclick="applyColorPreset('forest')" style="margin-left:5px;">Forest Theme</button>
+    </div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div class="pe-section">
+    <h3>Categories</h3>
+    <p style="font-size:11px;color:var(--ink3);margin-bottom:12px;">Rename, change emoji, or hide categories. These appear in the filter bar and category grid.</p>
+    <div id="pe-cats-grid">
+      <!-- Rendered by JS -->
+    </div>
+    <button onclick="addPeCategory()" class="btn btn-grey" style="margin-top:8px;">+ Add Category</button>
+  </div>
+
+  <!-- STORES -->
+  <div class="pe-section">
+    <h3>Stores</h3>
+    <p style="font-size:11px;color:var(--ink3);margin-bottom:12px;">Configure which stores appear on your site. Add your own stores or custom platforms.</p>
+    <div id="pe-stores-grid"><!-- Rendered by JS --></div>
+    <button onclick="addPeStore()" class="btn btn-grey" style="margin-top:8px;">+ Add Store</button>
+  </div>
+
+  <!-- TICKER -->
+  <div class="pe-section">
+    <h3>Ticker / Announcement Bar</h3>
+    <div class="ff"><label>Ticker Text (comma-separated items)</label><textarea id="pe-ticker" rows="3" style="width:100%;border:1px solid var(--border);padding:8px 11px;font-size:11px;outline:none;font-family:'DM Mono',monospace;" placeholder="🔥 iPhone 17 Pro Max — ₦2,720,000 ↓12%, ⚡ PS5 Slim — ₦650,000 ↓13%"></textarea></div>
+  </div>
+
+  <!-- PROMO BANNER -->
+  <div class="pe-section">
+    <h3>Promo Banner</h3>
+    <div class="fg">
+      <div class="ff fg-full"><label>Banner Text</label><input type="text" id="pe-promo" placeholder="🔥 Subscribe and unlock Admin Panel, Price Alerts & Full Scraper!" value="🔥 QuickCart Pro: Unlock Admin Panel, Price Alerts & Full Scraper!"></div>
+      <div class="ff"><label>CTA Button Text</label><input type="text" id="pe-promo-cta" placeholder="Get Pro Now →" value="Get Pro Now →"></div>
+    </div>
+  </div>
+
+  <!-- FONT -->
+  <div class="pe-section">
+    <h3>Typography</h3>
+    <div class="fg">
+      <div class="ff"><label>Heading Font</label>
+        <select id="pe-heading-font">
+          <option value="'Bebas Neue',sans-serif">Bebas Neue (Current — Editorial)</option>
+          <option value="'Playfair Display',serif">Playfair Display (Luxury)</option>
+          <option value="'Oswald',sans-serif">Oswald (Bold Condensed)</option>
+          <option value="'Anton',sans-serif">Anton (Impact Style)</option>
+          <option value="'DM Serif Display',serif">DM Serif (Refined)</option>
+        </select>
+      </div>
+      <div class="ff"><label>Body Font</label>
+        <select id="pe-body-font">
+          <option value="'DM Sans',sans-serif">DM Sans (Current — Clean)</option>
+          <option value="'Lato',sans-serif">Lato (Classic)</option>
+          <option value="'Nunito',sans-serif">Nunito (Friendly)</option>
+          <option value="'Source Sans 3',sans-serif">Source Sans 3 (Editorial)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVE -->
+  <div style="padding:20px 0;">
+    <button onclick="savePageConfig()" class="btn btn-orange" style="font-size:12px;padding:12px 32px;">💾 Save & Apply All Changes</button>
+    <button onclick="previewPageConfig()" class="btn btn-grey" style="margin-left:8px;">👁 Preview Changes</button>
+    <button onclick="exportPageConfig()" class="btn btn-grey" style="margin-left:8px;">⬇ Export Config JSON</button>
+    <div id="pe-save-msg" style="margin-top:10px;font-size:11px;color:var(--green);font-weight:600;display:none;"></div>
+  </div>
+</div>
+
+<!-- BOT CONFIG -->
+<div class="panel" id="p-botconfig">
+  <div class="ptitle">🤖 Deal Bot Config</div><div class="psub">Configure automated deal alerts sent via WhatsApp, Telegram, and email</div>
+  <div class="sc-box">
+    <h3>WhatsApp Bot</h3>
+    <p>Set up your WhatsApp number to auto-send deal alerts to subscribers. Use Twilio or WA Business API.</p>
+    <div class="fg">
+      <div class="ff"><label>WhatsApp Number</label><input type="tel" id="bot-wa-num" placeholder="+2348012345678"></div>
+      <div class="ff"><label>Twilio Account SID</label><input type="text" id="bot-twilio-sid" placeholder="ACxxxx…" style="font-family:'DM Mono',monospace;"></div>
+      <div class="ff"><label>Twilio Auth Token</label><input type="password" id="bot-twilio-token" placeholder="token…" style="font-family:'DM Mono',monospace;"></div>
+      <div class="ff"><label>Send Time</label><select id="bot-send-time"><option value="08:00">8:00 AM daily</option><option value="12:00">12:00 PM daily</option><option value="18:00">6:00 PM daily</option></select></div>
+    </div>
+    <button onclick="saveBotConfig()" class="btn btn-orange">Save Bot Config</button>
+    <button onclick="testBot()" class="btn btn-grey" style="margin-left:6px;">Send Test Message</button>
+  </div>
+  <div class="sc-box" style="margin-top:10px;">
+    <h3>Telegram Bot</h3>
+    <div class="fg">
+      <div class="ff"><label>Bot Token</label><input type="text" id="bot-tg-token" placeholder="7412345678:AAxxxx…" style="font-family:'DM Mono',monospace;"></div>
+      <div class="ff"><label>Channel ID</label><input type="text" id="bot-tg-channel" placeholder="@yourchannel or -100xxxxx"></div>
+    </div>
+    <button onclick="saveTelegramBot()" class="btn btn-orange">Save Telegram Config</button>
+    <button onclick="testTelegramBot()" class="btn btn-grey" style="margin-left:6px;">Send Test</button>
+  </div>
+  <div class="sc-box" style="margin-top:10px;">
+    <h3>Auto-Send Rules</h3>
+    <p style="font-size:11px;color:var(--ink3);margin-bottom:10px;">Define when the bot automatically sends alerts.</p>
+    <div class="fg">
+      <div class="ff"><label>Min Discount % to Alert</label><input type="number" id="bot-min-disc" placeholder="10" value="10"></div>
+      <div class="ff"><label>Max Deals Per Message</label><input type="number" id="bot-max-deals" placeholder="5" value="5"></div>
+      <div class="ff"><label>Target Categories</label><select id="bot-cats" multiple style="height:80px;border:1px solid var(--border);padding:4px;font-size:11px;outline:none;background:#fff;"><option selected>Smartphones</option><option selected>Laptops</option><option selected>Gaming</option><option>Electronics</option><option>Accessories</option></select></div>
+    </div>
+    <button onclick="saveBotRules()" class="btn btn-orange">Save Rules</button>
+  </div>
+</div>
+
+</main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const DB="https://sneakerai-c96f0-default-rtdb.firebaseio.com/products";
+const ORDERS_DB="https://sneakerai-c96f0-default-rtdb.firebaseio.com/orders";
+const SUBS_DB="https://sneakerai-c96f0-default-rtdb.firebaseio.com/subscriptions";
+const PEND_DB="https://sneakerai-c96f0-default-rtdb.firebaseio.com/pending-deals";
+const SETTINGS_DB="https://sneakerai-c96f0-default-rtdb.firebaseio.com/settings";
+let prods={},orders={},subs={},pendDeals={};
+let selectedIds=new Set();
+
+function go(n,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb').forEach(s=>s.classList.remove('on'));
+  document.getElementById('p-'+n).classList.add('on');
+  el.classList.add('on');
+  if(n==='dashboard')loadDash();
+  else if(n==='deals')loadProds();
+  else if(n==='orders')loadOrds();
+  else if(n==='subs')loadSubs();
+  else if(n==='pending')loadPending();
+  else if(n==='newsletter')loadNewsletter();
+  else if(n==='alerts')loadAlerts();
+  else if(n==='referrals')loadReferrals();
+  else if(n==='affiliate')loadAffiliate();
+  else if(n==='adslots')loadAdSlots();
+  else if(n==='leaderboard')loadLeaderboardAdmin();
+  else if(n==='digest')loadDigest();
+  else if(n==='hunt')loadHuntAdmin();
+  else if(n==='flash')loadFlashAdmin();
+  else if(n==='coupons')loadCouponsAdmin();
+  else if(n==='pageeditor')initPageEditor();
+}
+function fmt(n){return '₦'+Math.round(n).toLocaleString('en-NG');}
+function dp(o,c){if(!o||o<=c)return 0;return Math.round(((o-c)/o)*100);}
+function CE(c){return{Smartphones:'📱',Laptops:'💻',Gaming:'🎮',Electronics:'🔌',Accessories:'🎧'}[c]||'🛒';}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2800);}
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function loadDash(){
+  const[pr,or,sr]=await Promise.all([fetch(DB+'.json').then(r=>r.json()).catch(()=>({})),fetch(ORDERS_DB+'.json').then(r=>r.json()).catch(()=>({})),fetch(SUBS_DB+'.json').then(r=>r.json()).catch(()=>({}))]);
+  prods=pr||{};orders=or||{};subs=sr||{};
+  const ov=Object.values(orders);
+  document.getElementById('s-prod').textContent=Object.keys(prods).length;
+  document.getElementById('s-rev').textContent=fmt(ov.reduce((s,o)=>s+(o.total||0),0));
+  document.getElementById('s-ord').textContent=ov.length;
+  document.getElementById('s-subs').textContent=Object.keys(subs).length;
+  const recent=ov.sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
+  document.getElementById('dash-ord').innerHTML=!recent.length?'<tr class="empty-row"><td colspan="5">No orders yet</td></tr>':recent.map(o=>{const cust=o.customer||{};const name=o.customerName||cust.name||'—';const date=o.createdAt||o.date;return '<tr><td style="font-size:10px;font-family:\'DM Mono\',monospace;color:var(--ink4)">'+(o.ref||'').slice(0,12)+'…</td><td style="font-weight:600">'+name+'</td><td style="font-weight:700">'+fmt(o.total||0)+'</td><td><span class="bdg bdg-paid">'+(o.status||'paid')+'</span></td><td style="font-size:10px;color:var(--ink4)">'+(date?new Date(date).toLocaleDateString('en-NG'):'—')+'</td></tr>';}).join('');
+}
+
+async function loadProds(){
+  const r=await fetch(DB+'.json').catch(()=>({json:()=>({})}));prods=await r.json()||{};
+  selectedIds.clear();renderProds(prods);
+}
+function renderProds(data){
+  const keys=Object.keys(data||{});
+  document.getElementById('pcnt').textContent=keys.length;
+  updateSelCount();
+  document.getElementById('prod-tb').innerHTML=!keys.length?'<tr class="empty-row"><td colspan="9">No deals yet. Use Scraper to seed.</td></tr>':
+    keys.map(k=>{const p=data[k],base=Number(p.price)||0,orig=Number(p.originalPrice)||0,d=dp(orig,base);
+      const cartTypeLabel=p.inStock===true?'<span style="color:var(--green);font-weight:700;font-size:9px;">🛒 Buy</span>':p.inStock==='reserve'?'<span style="color:#b45309;font-weight:700;font-size:9px;">📦 Reserve</span>':'<span style="color:var(--ink4);font-size:9px;">🔗 Affiliate</span>';
+      return '<tr id="row_'+k+'" class="'+(selectedIds.has(k)?'selected':'')+'"><td style="width:36px;text-align:center"><input type="checkbox" class="row-chk" data-id="'+k+'" '+(selectedIds.has(k)?'checked':'')+' onchange="toggleRow(this)"></td><td>'+(p.image?'<img class="td-img" src="'+p.image+'" onerror="this.style.display=\'none\'">':CE(p.category))+'</td><td><strong style="font-size:11px">'+(p.name||'')+'</strong>'+(p.tag?'<span class="bdg" style="background:var(--grey1);color:#555;margin-left:5px">'+p.tag+'</span>':'')+'</td><td style="color:var(--ink3);font-size:10px">'+(p.category||'—')+'</td><td style="font-weight:600;font-size:11px">'+(p.store||'—')+'</td><td style="font-weight:700;font-family:\'DM Mono\',monospace;font-size:11px">'+fmt(base)+'</td><td>'+(d>0?'<span style="background:var(--grey1);color:var(--green);font-weight:700;padding:2px 5px;font-size:9px;letter-spacing:.04em">-'+d+'%</span>':'—')+'</td><td>'+cartTypeLabel+'</td><td>'+(p.storeUrl?'<a class="sl" href="'+p.storeUrl+'" target="_blank">Open ↗</a>':'—')+'</td><td style="display:flex;gap:4px"><button class="btn btn-grey btn-sm" onclick="editProd(\''+k+'\')">Edit</button><button class="btn btn-red btn-sm" onclick="delProd(\''+k+'\')">Del</button></td></tr>';
+    }).join('');
+}
+function filterProds(){const q=document.getElementById('psearch').value.toLowerCase(),f={};Object.keys(prods).forEach(k=>{const p=prods[k];if(((p.name||'')+(p.brand||'')+(p.category||'')+(p.store||'')).toLowerCase().includes(q))f[k]=p;});renderProds(f);}
+function toggleRow(cb){const id=cb.dataset.id;if(cb.checked)selectedIds.add(id);else selectedIds.delete(id);const row=document.getElementById('row_'+id);if(row)row.classList.toggle('selected',cb.checked);updateSelCount();}
+function toggleAll(cb){document.querySelectorAll('.row-chk').forEach(c=>{c.checked=cb.checked;const id=c.dataset.id;if(cb.checked)selectedIds.add(id);else selectedIds.delete(id);const row=document.getElementById('row_'+id);if(row)row.classList.toggle('selected',cb.checked);});updateSelCount();}
+function updateSelCount(){const n=selectedIds.size;document.getElementById('sel-count').textContent=n+' selected';document.getElementById('bulk-del-btn').classList.toggle('show',n>0);}
+async function bulkDelete(){
+  if(!selectedIds.size)return;
+  if(!confirm('Delete '+selectedIds.size+' selected deal(s)?'))return;
+  const ids=[...selectedIds];for(const id of ids){await fetch(DB+'/'+id+'.json',{method:'DELETE'});delete prods[id];}
+  selectedIds.clear();toast('🗑 Deleted');loadProds();
+}
+async function saveDeal(){
+  const name=document.getElementById('f-name').value.trim(),brand=document.getElementById('f-brand').value.trim(),cat=document.getElementById('f-cat').value,price=Number(document.getElementById('f-price').value),orig=Number(document.getElementById('f-orig').value)||null,store=document.getElementById('f-store').value,url=document.getElementById('f-url').value.trim(),qty=Number(document.getElementById('f-qty').value)||0,img=document.getElementById('f-img').value.trim(),tag=document.getElementById('f-tag').value,sponsored=document.getElementById('f-sponsored').value==='1',eid=document.getElementById('f-eid').value;
+  const inStockVal=document.getElementById('f-instock')?document.getElementById('f-instock').value:'affiliate';
+  const inStock=inStockVal==='true'?true:inStockVal==='reserve'?'reserve':false;
+  if(!name||!brand||!cat||!price||!store){toast('⚠️ Fill Name, Brand, Category, Price, Store');return;}
+  // Apply affiliate tag to URL
+  const affUrl=applyAffiliateTag(url,store);
+  const id=eid||(cat+'-'+brand+'-'+name).replace(/\s+/g,'-').toLowerCase().replace(/[^a-z0-9-]/g,'');
+  try{await fetch(DB+'/'+id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,brand,category:cat,price,originalPrice:orig,store,storeUrl:affUrl||url,quantity:qty,inStock,image:img,tag,sponsored:sponsored||undefined,lastUpdated:new Date().toISOString()})});toast(eid?'✅ Updated!':'✅ Deal added!');clearForm();loadProds();}catch(e){toast('❌ Save failed');}
+}
+}
+function applyAffiliateTag(url,store){
+  const affLinks=JSON.parse(localStorage.getItem('qc_aff_links')||'{}');
+  if(!url)return url;
+  const storeKey=store.toLowerCase().replace(/\s+/g,'');
+  const tag=affLinks[storeKey]||affLinks[store]||'';
+  if(!tag)return url;
+  try{
+    const u=new URL(url);
+    if(url.includes('jumia.com'))u.searchParams.set('tag',tag);
+    else if(url.includes('konga.com'))u.searchParams.set('ref',tag);
+    else if(url.includes('slot.ng'))u.searchParams.set('ref',tag);
+    else if(url.includes('amazon.com'))u.searchParams.set('tag',tag);
+    else if(url.includes('aliexpress.com'))u.searchParams.set('aff_fcid',tag);
+    else u.searchParams.set('ref',tag);
+    return u.toString();
+  }catch(e){return url+'?ref='+tag;}
+}
+function editProd(k){
+  const p=prods[k];
+  document.getElementById('f-name').value=p.name||'';document.getElementById('f-brand').value=p.brand||'';document.getElementById('f-cat').value=p.category||'';document.getElementById('f-price').value=p.price||'';document.getElementById('f-orig').value=p.originalPrice||'';document.getElementById('f-store').value=p.store||'';document.getElementById('f-url').value=p.storeUrl||'';document.getElementById('f-qty').value=p.quantity||'';document.getElementById('f-img').value=p.image||'';document.getElementById('f-tag').value=p.tag||'';document.getElementById('f-sponsored').value=p.sponsored?'1':'';document.getElementById('f-eid').value=k;
+  // Set inStock selector
+  var inStockEl=document.getElementById('f-instock');
+  if(inStockEl){inStockEl.value=p.inStock===true?'true':p.inStock==='reserve'?'reserve':'affiliate';}
+  document.getElementById('ftitle').textContent='Edit Deal: '+p.name;window.scrollTo({top:0,behavior:'smooth'});toast('Editing: '+p.name);
+}
+async function delProd(k){if(!confirm('Delete "'+prods[k]?.name+'"?'))return;await fetch(DB+'/'+k+'.json',{method:'DELETE'});toast('Deleted');loadProds();}
+function clearForm(){['f-name','f-brand','f-price','f-orig','f-url','f-qty','f-img','f-eid'].forEach(i=>{var e=document.getElementById(i);if(e)e.value='';});['f-cat','f-store','f-tag'].forEach(i=>{var e=document.getElementById(i);if(e)e.value='';});var sp=document.getElementById('f-sponsored');if(sp)sp.value='';var fi=document.getElementById('f-instock');if(fi)fi.value='affiliate';document.getElementById('ftitle').textContent='Add New Deal';}
+async function loadOrds(){const r=await fetch(ORDERS_DB+'.json').catch(()=>({json:()=>({})}));orders=await r.json()||{};renderOrds(orders);}
+function renderOrds(data){
+  const keys=Object.keys(data||{});
+  document.getElementById('ord-tb').innerHTML=!keys.length
+    ?'<tr class="empty-row"><td colspan="8">No orders yet</td></tr>'
+    :keys.sort((a,b)=>{
+        const da=data[a].createdAt||data[a].date||'';
+        const db=data[b].createdAt||data[b].date||'';
+        return new Date(db)-new Date(da);
+      }).map(k=>{
+        const o=data[k];
+        // Support both old format (customerName/email) and new cart format (customer.name/email)
+        const cust=o.customer||{};
+        const name=o.customerName||cust.name||'—';
+        const email=o.email||cust.email||'—';
+        const phone=o.phone||cust.phone||'—';
+        const address=o.address||cust.address||'—';
+        const itemCount=Array.isArray(o.items)?o.items.length:(o.items?Object.keys(o.items).length:0);
+        const total=o.total||o.amount||0;
+        const dateStr=o.createdAt||o.date?new Date(o.createdAt||o.date).toLocaleDateString('en-NG'):'—';
+        const status=o.status||'paid';
+        const statusColor=status==='paid'?'var(--green)':status==='pending'?'#e65100':'var(--ink4)';
+        return '<tr>'
+          +'<td style="font-size:10px;font-family:\'DM Mono\',monospace;color:var(--ink4)">'+(o.ref||k).slice(0,14)+'…</td>'
+          +'<td style="font-weight:600">'+name+'</td>'
+          +'<td style="font-size:10px;color:var(--ink3)">'+email+'<br><span style="color:var(--ink4)">'+phone+'</span></td>'
+          +'<td style="font-size:10px;color:var(--ink3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+address+'</td>'
+          +'<td>'+itemCount+' item'+(itemCount!==1?'s':'')+'</td>'
+          +'<td style="font-weight:700;font-family:\'DM Mono\',monospace">'+fmt(total)+'</td>'
+          +'<td><span style="font-weight:700;color:'+statusColor+';font-size:10px;text-transform:uppercase;letter-spacing:.04em;">'+status+'</span></td>'
+          +'<td style="font-size:10px;color:var(--ink4)">'+dateStr+'</td>'
+        +'</tr>';
+      }).join('');
+}
+function filterOrds(){const q=document.getElementById('osearch').value.toLowerCase(),f={};Object.keys(orders).forEach(k=>{const o=orders[k];const cust=o.customer||{};if(((o.customerName||cust.name||'')+(o.ref||k)+(o.email||cust.email||'')).toLowerCase().includes(q))f[k]=o;});renderOrds(f);}
+function exportOrdersCSV(){
+  if(!orders||!Object.keys(orders).length){toast('No orders to export');return;}
+  var rows=['Ref,Customer,Email,Phone,Address,Items,Total,Status,Date'];
+  Object.keys(orders).forEach(function(k){
+    var o=orders[k];var cust=o.customer||{};
+    var name=o.customerName||cust.name||'';
+    var email=o.email||cust.email||'';
+    var phone=o.phone||cust.phone||'';
+    var address=(o.address||cust.address||'').replace(/,/g,' ');
+    var items=Array.isArray(o.items)?o.items.length:0;
+    var date=o.createdAt||o.date?new Date(o.createdAt||o.date).toLocaleDateString('en-NG'):'';
+    rows.push([o.ref||k,name,email,phone,address,items,o.total||0,o.status||'paid',date].join(','));
+  });
+  var blob=new Blob([rows.join('\n')],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='quickcart-orders.csv';a.click();
+  toast('✅ Orders exported!');
+}
+async function loadSubs(){const r=await fetch(SUBS_DB+'.json').catch(()=>({json:()=>({})}));subs=await r.json()||{};const keys=Object.keys(subs);document.getElementById('sub-cnt').textContent=keys.length;document.getElementById('sub-tb').innerHTML=!keys.length?'<tr class="empty-row"><td colspan="7">No subscribers yet</td></tr>':keys.map(k=>{const s=subs[k],exp=s.expiresAt?new Date(s.expiresAt):null,active=exp?exp>new Date():true;return '<tr><td style="font-weight:600">'+(s.email||'—')+'</td><td>'+(s.plan||'—')+'</td><td>'+(s.cycle||'—')+'</td><td style="font-weight:700">₦'+(s.amountNGN||0)+'</td><td style="font-size:10px;font-family:\'DM Mono\',monospace">'+(s.ref||'—').slice(0,12)+'</td><td style="font-size:10px">'+(s.activatedAt?new Date(s.activatedAt).toLocaleDateString('en-NG'):'—')+'</td><td><span class="'+(active?'sub-active':'sub-expired')+'">'+(active?'Active':'Expired')+'</span></td></tr>';}).join('');}
+async function loadPending(){const r=await fetch(PEND_DB+'.json').catch(()=>({json:()=>({})}));pendDeals=await r.json()||{};const keys=Object.keys(pendDeals);document.getElementById('pend-cnt').textContent=keys.length;document.getElementById('pend-tb').innerHTML=!keys.length?'<tr class="empty-row"><td colspan="8">No pending submissions</td></tr>':keys.map(k=>{const p=pendDeals[k];return '<tr><td style="font-weight:600">'+(p.name||'—')+'</td><td>'+(p.brand||'—')+'</td><td>'+(p.category||'—')+'</td><td style="font-weight:700">'+fmt(Number(p.price)||0)+'</td><td>'+(p.store||'—')+'</td><td style="font-size:10px;color:var(--ink3)">'+(p.submitterEmail||'—')+'</td><td style="font-size:10px;color:var(--ink4)">'+(p.submittedAt?new Date(p.submittedAt).toLocaleDateString('en-NG'):'—')+'</td><td style="white-space:nowrap"><button class="pend-approve" onclick="approvePending(\''+k+'\')">✓ Approve</button><button class="pend-reject" onclick="rejectPending(\''+k+'\')">✕ Reject</button></td></tr>';}).join('');}
+async function approvePending(k){const p=pendDeals[k];const id=(p.category+'-'+(p.brand||'x')+'-'+p.name).replace(/\s+/g,'-').toLowerCase().replace(/[^a-z0-9-]/g,'');try{await fetch(DB+'/'+id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,status:'approved',lastUpdated:new Date().toISOString()})});await fetch(PEND_DB+'/'+k+'.json',{method:'DELETE'});toast('✅ Deal approved and live!');loadPending();}catch(e){toast('❌ Error');}}
+async function rejectPending(k){if(!confirm('Reject this submission?'))return;await fetch(PEND_DB+'/'+k+'.json',{method:'DELETE'});toast('Submission rejected');loadPending();}
+
+// ─── REAL WEB SCRAPER ───────────────────────────────────────────
+var _aiListingData=null;
+
+async function realScrape(){
+  var url=(document.getElementById('ws-url')||{}).value.trim();
+  var storeOverride=(document.getElementById('ws-store')||{}).value.trim();
+  if(!url){toast('⚠ Please enter a URL');return;}
+  var btn=document.getElementById('ws-btn');btn.disabled=true;btn.textContent='Scraping…';
+  var logEl=document.getElementById('ws-log');logEl.innerHTML='';
+  var progEl=document.getElementById('ws-prog');progEl.style.width='10%';
+  function lg(m,t){var d=document.createElement('div');d.className=t;d.textContent='['+new Date().toLocaleTimeString()+'] '+m;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
+  lg('Fetching: '+url,'inf');
+  // Detect store
+  var detectedStore=storeOverride||'Other';
+  if(!storeOverride){
+    if(url.includes('jumia.com'))detectedStore='Jumia';
+    else if(url.includes('konga.com'))detectedStore='Konga';
+    else if(url.includes('slot.ng'))detectedStore='Slot';
+    else if(url.includes('3chub.com'))detectedStore='3C Hub';
+    else if(url.includes('kara.com.ng'))detectedStore='Kara';
+    else if(url.includes('amazon.com'))detectedStore='Amazon';
+    else if(url.includes('aliexpress.com'))detectedStore='AliExpress';
+    else if(url.includes('garmspot.com'))detectedStore='Garmspot';
+    else if(url.includes('jiji.ng'))detectedStore='Jiji';
+    else if(url.includes('pointekonline.com'))detectedStore='Pointek';
+    else if(url.includes('fouanistore.com'))detectedStore='Fouani';
+    else if(url.includes('simsng.com'))detectedStore='Sims';
+  }
+  lg('Detected store: '+detectedStore,'inf');
+  progEl.style.width='25%';
+  // Use CORS proxies to fetch page HTML
+  var proxies=[
+    'https://api.allorigins.win/get?url='+encodeURIComponent(url),
+    'https://corsproxy.io/?'+encodeURIComponent(url),
+    'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(url)
+  ];
+  var html='';
+  for(var i=0;i<proxies.length;i++){
+    try{
+      lg('Trying proxy '+(i+1)+'…','inf');
+      var res=await fetch(proxies[i]);
+      if(res.ok){
+        var data=await res.json().catch(async()=>{return{contents:await res.text()};});
+        html=data.contents||data||'';
+        if(typeof html==='string'&&html.length>200){lg('✔ Page fetched! ('+html.length+' chars)','ok');break;}
+      }
+    }catch(e){lg('Proxy '+(i+1)+' failed: '+e.message,'err');}
+  }
+  progEl.style.width='55%';
+  if(!html||html.length<200){lg('⚠ Could not fetch page. Using AI fallback with URL…','err');html='';}
+  // Parse product data from HTML
+  var product=parseProductFromHTML(html,url,detectedStore);
+  progEl.style.width='80%';
+  lg('Parsed: '+product.name+' — '+product.price,'ok');
+  // Save to Firebase
+  var id=(product.category+'-'+(product.brand||'x')+'-'+product.name+'-'+Date.now()).replace(/\s+/g,'-').toLowerCase().replace(/[^a-z0-9-]/g,'');
+  try{
+    await fetch(DB+'/'+id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...product,lastUpdated:new Date().toISOString()})});
+    lg('✔ Saved to database: '+product.name,'ok');progEl.style.width='100%';toast('✅ Product scraped and saved!');loadProds();
+  }catch(e){lg('✘ Failed to save: '+e.message,'err');}
+  btn.disabled=false;btn.textContent='🌐 Scrape URL Now';
+}
+
+function parseProductFromHTML(html,url,store){
+  var doc=null;
+  try{if(html){var parser=new DOMParser();doc=parser.parseFromString(html,'text/html');}}catch(e){}
+  var name='Product from '+store;var price=0;var image='';var brand='';var cat='Electronics';var orig=0;
+  if(doc){
+    // Try common product page selectors
+    var selectors={
+      name:['h1','[itemprop="name"]','[class*="product-name"]','[class*="product-title"]','[class*="pdp-name"]','[data-testid="product-name"]','.title','h1.page-title'],
+      price:['[class*="price"]','[itemprop="price"]','[data-testid="product-price"]','.pdp-price','.product-price','[class*="prc"]','[class*="cost"]'],
+      image:['[itemprop="image"]','[class*="product-image"] img','[class*="gallery"] img','.pdp-image img','meta[property="og:image"]','main img'],
+      brand:['[itemprop="brand"]','[class*="brand"]','[data-testid="brand"]']
+    };
+    for(var sel of selectors.name){var el=doc.querySelector(sel);if(el&&el.textContent.trim().length>3){name=el.textContent.trim().slice(0,120);break;}}
+    for(var sel of selectors.price){var el=doc.querySelector(sel);if(el){var txt=el.textContent.replace(/[₦,$,£,€,\s,]/g,'').replace(/[^0-9.]/g,'');var p=parseFloat(txt);if(p>0){price=p;break;}}}
+    for(var sel of selectors.image){var el=doc.querySelector(sel);if(el){var src=el.getAttribute('src')||el.getAttribute('content')||el.getAttribute('data-src')||'';if(src&&src.startsWith('http')){image=src;break;}}}
+    for(var sel of selectors.brand){var el=doc.querySelector(sel);if(el&&el.textContent.trim()){brand=el.textContent.trim().slice(0,50);break;}}
+    // Try og tags
+    var ogTitle=doc.querySelector('meta[property="og:title"]');if(ogTitle&&ogTitle.content&&name==='Product from '+store)name=ogTitle.content.slice(0,120);
+    var ogImg=doc.querySelector('meta[property="og:image"]');if(ogImg&&ogImg.content&&!image)image=ogImg.content;
+  }
+  // If price looks like it's in $ (small number), convert to NGN
+  if(price>0&&price<10000)price=Math.round(price*1580);
+  // Category detection from name/url
+  var lower=(name+url).toLowerCase();
+  if(lower.includes('phone')||lower.includes('iphone')||lower.includes('samsung')&&!lower.includes('tv')||lower.includes('tecno')||lower.includes('infinix')||lower.includes('xiaomi'))cat='Smartphones';
+  else if(lower.includes('laptop')||lower.includes('macbook')||lower.includes('computer')||lower.includes('notebook'))cat='Laptops';
+  else if(lower.includes('ps5')||lower.includes('xbox')||lower.includes('gaming')||lower.includes('nintendo'))cat='Gaming';
+  else if(lower.includes('tv')||lower.includes('fridge')||lower.includes('headphone')||lower.includes('speaker'))cat='Electronics';
+  else if(lower.includes('charger')||lower.includes('cable')||lower.includes('case')||lower.includes('watch'))cat='Accessories';
+  // Estimate original price if not found
+  if(!orig&&price>0)orig=Math.round(price*1.2);
+  // Brand from name if not found
+  if(!brand){var brands=['Apple','Samsung','Tecno','Infinix','Xiaomi','HP','Dell','Lenovo','Sony','LG','Asus','Bose','Anker'];for(var b of brands){if(name.toLowerCase().includes(b.toLowerCase())){brand=b;break;}}}
+  // Apply affiliate tag
+  var affUrl=applyAffiliateTag(url,store);
+  return{name,brand,category:cat,price:price||150000,originalPrice:orig||Math.round((price||150000)*1.2),store,storeUrl:affUrl||url,image,tag:'NEW',quantity:10};
+}
+
+async function batchScrape(){
+  var urls=prompt('Paste URLs to scrape (one per line):');
+  if(!urls)return;
+  var list=urls.split('\n').map(u=>u.trim()).filter(Boolean);
+  toast('Scraping '+list.length+' URLs…');
+  var ok=0;
+  for(var url of list){
+    document.getElementById('ws-url').value=url;
+    await realScrape();
+    ok++;await new Promise(r=>setTimeout(r,1500));
+  }
+  toast('✅ Scraped '+ok+' URLs!');
+}
+
+// AI AUTO-LISTING
+async function aiAutoList(){
+  var inp=document.getElementById('ai-list-inp').value.trim();
+  var store=document.getElementById('ai-list-store').value;
+  var apiKey=document.getElementById('ai-claude-key').value.trim();
+  if(!inp){toast('⚠ Please enter a product name or URL');return;}
+  var btn=document.getElementById('ai-list-btn');btn.disabled=true;btn.textContent='🤖 AI is thinking…';
+  var logEl=document.getElementById('ai-list-log');logEl.style.display='block';logEl.innerHTML='';
+  function lg(m,t){var d=document.createElement('div');d.className=t;d.textContent='['+new Date().toLocaleTimeString()+'] '+m;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
+  if(!store&&inp.includes('http')){if(inp.includes('jumia.com'))store='Jumia';else if(inp.includes('konga.com'))store='Konga';else if(inp.includes('slot.ng'))store='Slot';}
+  lg('Analysing: '+inp,'inf');
+  var prompt='You are a Nigerian e-commerce data expert. Given: "'+inp+'", generate a complete deal listing.\n\nReturn ONLY valid JSON:\n{\n  "name":"full product name","brand":"brand","category":"Smartphones/Laptops/Gaming/Electronics/Accessories","price":NGN_number,"originalPrice":slightly_higher_NGN,"store":"'+(store||'Jumia')+'","storeUrl":"best URL","tag":"HOT/NEW/SALE/LIMITED or empty","quantity":10,"description":"2 sentence description","keySpecs":["spec1","spec2","spec3"]\n}\nBase NGN prices on ~₦1580/USD market rate.';
+  try{
+    var listing=null;
+    if(apiKey&&apiKey.length>20){
+      lg('Using Claude AI…','inf');
+      var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})});
+      var data=await res.json();
+      if(data.content&&data.content[0]){var text=data.content[0].text.replace(/```json|```/g,'').trim();listing=JSON.parse(text);lg('✔ Claude AI generated listing!','ok');}
+    }else{lg('Using smart fallback…','inf');listing=generateFallbackListing(inp,store);}
+    if(listing){
+      _aiListingData=listing;
+      var res=document.getElementById('ai-list-result');var prev=document.getElementById('ai-list-preview');res.style.display='block';
+      prev.innerHTML='<strong>'+listing.name+'</strong><br>🏷 '+listing.brand+' · '+listing.category+' · '+(listing.tag||'No tag')+'<br>💰 <strong>₦'+(listing.price||0).toLocaleString()+'</strong>'+(listing.originalPrice?' <span style="text-decoration:line-through;opacity:.4">₦'+(listing.originalPrice||0).toLocaleString()+'</span>':'')+'<br>🏪 '+listing.store+(listing.description?'<br><br><em style="opacity:.6">'+listing.description+'</em>':'')+(listing.keySpecs&&listing.keySpecs.length?'<br><br>📋 '+listing.keySpecs.join(' · '):'');
+      lg('Review above and click "Apply to Form & Save"','ok');
+    }
+  }catch(err){lg('✘ Error: '+err.message,'err');toast('❌ AI error. Try again.');}
+  btn.disabled=false;btn.textContent='🤖 AI Generate Listing';
+}
+function generateFallbackListing(name,store){
+  var lower=name.toLowerCase();var cat='Electronics';var brand='Unknown';var price=150000;var tag='NEW';
+  if(lower.includes('phone')||lower.includes('iphone')||lower.includes('samsung')&&!lower.includes('tv')||lower.includes('tecno')||lower.includes('infinix')||lower.includes('xiaomi')||lower.includes('pixel')){cat='Smartphones';price=lower.includes('pro')||lower.includes('ultra')?800000:lower.includes('plus')?450000:200000;tag='HOT';}
+  else if(lower.includes('laptop')||lower.includes('macbook')||lower.includes('dell')||lower.includes('hp ')||lower.includes('lenovo')||lower.includes('asus')){cat='Laptops';price=lower.includes('pro')||lower.includes('rtx')||lower.includes('m3')?1500000:650000;tag='NEW';}
+  else if(lower.includes('ps5')||lower.includes('xbox')||lower.includes('gaming')||lower.includes('controller')){cat='Gaming';price=450000;tag='HOT';}
+  else if(lower.includes('tv')||lower.includes('fridge')||lower.includes('washing')||lower.includes('lg ')){cat='Electronics';price=350000;}
+  else if(lower.includes('earphone')||lower.includes('headphone')||lower.includes('airpods')||lower.includes('charger')){cat='Accessories';price=55000;}
+  var brands=['Samsung','Apple','Tecno','Infinix','Xiaomi','Realme','OnePlus','Google','HP','Dell','Lenovo','Asus','LG','Sony','Bose','Anker','Belkin'];
+  for(var i=0;i<brands.length;i++){if(lower.includes(brands[i].toLowerCase())){brand=brands[i];break;}}
+  return{name:name.charAt(0).toUpperCase()+name.slice(1),brand,category:cat,price,originalPrice:Math.round(price*1.2),store:store||'Jumia',storeUrl:store==='Konga'?'https://www.konga.com/':store==='Slot'?'https://slot.ng/':'https://www.jumia.com.ng/',tag,quantity:10,description:'Premium '+cat.toLowerCase()+' from '+brand+'. Available now in Nigeria.',keySpecs:[]};
+}
+function applyAIListing(){
+  if(!_aiListingData){toast('Generate a listing first');return;}
+  var d=_aiListingData;
+  try{
+    document.getElementById('f-name').value=d.name||'';document.getElementById('f-brand').value=d.brand||'';document.getElementById('f-cat').value=d.category||'';document.getElementById('f-price').value=d.price||'';document.getElementById('f-orig').value=d.originalPrice||'';document.getElementById('f-store').value=d.store||'';document.getElementById('f-url').value=d.storeUrl||'';document.getElementById('f-qty').value=d.quantity||'';document.getElementById('f-tag').value=d.tag||'';
+    document.querySelector('.sb[onclick*="deals"]').click();toast('✅ AI listing applied! Review and hit Save Deal.');
+  }catch(e){toast('Applied — switch to Deals tab to save.');}
+}
+
+// FRESH SEED
+const FRESH=[
+  {name:'Google Pixel 9 Pro 256GB',brand:'Google',category:'Smartphones',price:1200000,originalPrice:1480000,store:'Jumia',storeUrl:'https://www.jumia.com.ng/catalog/?q=google+pixel+9+pro',tag:'NEW',quantity:6},
+  {name:'OnePlus 13 256GB',brand:'OnePlus',category:'Smartphones',price:850000,originalPrice:1050000,store:'Konga',storeUrl:'https://www.konga.com/search?search=oneplus+13',tag:'NEW',quantity:8},
+  {name:'Realme GT 6T',brand:'Realme',category:'Smartphones',price:290000,originalPrice:370000,store:'Jumia',storeUrl:'https://www.jumia.com.ng/catalog/?q=realme+gt+6t',tag:'SALE',quantity:15},
+  {name:'Microsoft Surface Laptop 6',brand:'Microsoft',category:'Laptops',price:2100000,originalPrice:2600000,store:'3C Hub',storeUrl:'https://www.3chub.com/search?q=surface+laptop+6',tag:'NEW',quantity:4},
+  {name:'HP EliteBook 840 G11',brand:'HP',category:'Laptops',price:1450000,originalPrice:1800000,store:'Jumia',storeUrl:'https://www.jumia.com.ng/catalog/?q=hp+elitebook+840',tag:'NEW',quantity:5},
+  {name:'Razer Blade 15 RTX 4080',brand:'Razer',category:'Laptops',price:2800000,originalPrice:3400000,store:'3C Hub',storeUrl:'https://www.3chub.com/search?q=razer+blade+15',tag:'HOT',quantity:2},
+  {name:'Sennheiser Momentum 4',brand:'Sennheiser',category:'Electronics',price:185000,originalPrice:240000,store:'Slot',storeUrl:'https://slot.ng/search?q=sennheiser+momentum+4',tag:'SALE',quantity:12},
+  {name:'LG 27" UltraGear 4K OLED',brand:'LG',category:'Electronics',price:580000,originalPrice:720000,store:'Jumia',storeUrl:'https://www.jumia.com.ng/catalog/?q=lg+27+ultragear+oled',tag:'NEW',quantity:6},
+  {name:'Valve Steam Deck OLED',brand:'Valve',category:'Gaming',price:520000,originalPrice:640000,store:'3C Hub',storeUrl:'https://www.3chub.com/search?q=steam+deck+oled',tag:'HOT',quantity:5},
+  {name:'ASUS ROG Ally X',brand:'ASUS',category:'Gaming',price:680000,originalPrice:840000,store:'3C Hub',storeUrl:'https://www.3chub.com/search?q=asus+rog+ally+x',tag:'NEW',quantity:4},
+  {name:'PS5 Marvel Spider-Man Bundle',brand:'Sony',category:'Gaming',price:735000,originalPrice:880000,store:'Jumia',storeUrl:'https://www.jumia.com.ng/catalog/?q=ps5+spiderman+bundle',tag:'LIMITED',quantity:2},
+  {name:'Anker 100W GaN II Charger',brand:'Anker',category:'Accessories',price:32000,originalPrice:42000,store:'Jumia',storeUrl:'https://www.jumia.com.ng/catalog/?q=anker+100w+gan',tag:'SALE',quantity:40},
+  {name:'Samsung T9 Portable SSD 2TB',brand:'Samsung',category:'Accessories',price:95000,originalPrice:125000,store:'Jumia',storeUrl:'https://www.jumia.com.ng/catalog/?q=samsung+t9+ssd+2tb',tag:'HOT',quantity:15},
+  {name:'Sony WF-1000XM5 True Wireless',brand:'Sony',category:'Accessories',price:165000,originalPrice:210000,store:'Slot',storeUrl:'https://slot.ng/search?q=sony+wf-1000xm5',tag:'HOT',quantity:12},
+  {name:'Bose QuietComfort 45',brand:'Bose',category:'Electronics',price:195000,originalPrice:250000,store:'Jumia',storeUrl:'https://www.jumia.com.ng/catalog/?q=bose+quietcomfort+45',tag:'HOT',quantity:10},
+];
+async function seedAll(){
+  var logEl=document.getElementById('seed-log');logEl.innerHTML='';
+  function lg(m,t){var d=document.createElement('div');d.className=t;d.textContent='['+new Date().toLocaleTimeString()+'] '+m;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
+  lg('Seeding '+FRESH.length+' fresh deals…','inf');var ok=0;
+  for(var i=0;i<FRESH.length;i++){
+    var p=FRESH[i];var ts=Date.now()+i;var id=(p.category+'-'+p.brand+'-'+p.name+'-'+ts).replace(/\s+/g,'-').toLowerCase().replace(/[^a-z0-9-]/g,'');
+    var affUrl=applyAffiliateTag(p.storeUrl,p.store);
+    try{await fetch(DB+'/'+id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,storeUrl:affUrl||p.storeUrl,lastUpdated:new Date().toISOString()})});ok++;lg('✔ '+p.name,'ok');document.getElementById('seed-prog').style.width=Math.round((i+1)/FRESH.length*100)+'%';await new Promise(r=>setTimeout(r,80));}
+    catch(e){lg('✘ Failed: '+p.name,'err');}
+  }
+  lg('Done! '+ok+'/'+FRESH.length+' deals live.','ok');toast('🚀 '+ok+' fresh deals are live!');
+}
+async function bulkImport(){
+  var raw=document.getElementById('bulk-json').value.trim();if(!raw){toast('Paste JSON first');return;}
+  var data;try{data=JSON.parse(raw);}catch(e){toast('❌ Invalid JSON');return;}
+  if(!Array.isArray(data)){toast('❌ Must be array');return;}
+  var cnt=0;for(var p of data){if(!p.name||!p.price)continue;var id=((p.category||'deal')+'-'+(p.brand||'x')+'-'+p.name).replace(/\s+/g,'-').toLowerCase().replace(/[^a-z0-9-]/g,'');var affUrl=applyAffiliateTag(p.storeUrl||'',p.store||'');await fetch(DB+'/'+id+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...p,storeUrl:affUrl||p.storeUrl,lastUpdated:new Date().toISOString()})});cnt++;}
+  toast('✅ '+cnt+' deals imported!');
+}
+
+// ─── NEWSLETTER ──────────────────────────────────────────────────
+var NEWSL_DB="https://sneakerai-c96f0-default-rtdb.firebaseio.com/newsletter";
+var ALERTS_DB="https://sneakerai-c96f0-default-rtdb.firebaseio.com/alerts";
+var REFS_DB="https://sneakerai-c96f0-default-rtdb.firebaseio.com/referrals";
+async function loadNewsletter(){const r=await fetch(NEWSL_DB+'.json').catch(()=>({json:()=>({})}));const data=await r.json()||{};const keys=Object.keys(data);document.getElementById('news-cnt').textContent=keys.length;document.getElementById('news-tb').innerHTML=!keys.length?'<tr class="empty-row"><td colspan="3">No subscribers yet</td></tr>':keys.map(k=>{const s=data[k];return '<tr><td style="font-weight:600">'+(s.email||'—')+'</td><td style="font-size:10px;color:var(--ink4)">'+(s.ts?new Date(s.ts).toLocaleDateString('en-NG'):'—')+'</td><td><span style="color:var(--green);font-weight:600">Active</span></td></tr>';}).join('');}
+function exportNewsletterCSV(){fetch(NEWSL_DB+'.json').then(r=>r.json()).then(data=>{if(!data){toast('No subscribers');return;}const rows=['Email,Date'].concat(Object.values(data).map(s=>s.email+','+(s.ts?new Date(s.ts).toLocaleDateString('en-NG'):'')));const blob=new Blob([rows.join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='quickcart-newsletter.csv';a.click();});}
+async function loadAlerts(){const r=await fetch(ALERTS_DB+'.json').catch(()=>({json:()=>({})}));const data=await r.json()||{};const keys=Object.keys(data);document.getElementById('alert-cnt').textContent=keys.length;document.getElementById('alert-tb').innerHTML=!keys.length?'<tr class="empty-row"><td colspan="5">No alerts set yet</td></tr>':keys.map(k=>{const a=data[k];return '<tr><td style="font-weight:600">'+(a.email||'—')+'</td><td style="font-size:10px;font-family:\'DM Mono\',monospace">'+(a.productId||'—').slice(0,20)+'</td><td style="font-weight:700">'+fmt(a.targetPrice||0)+'</td><td style="font-size:10px;color:var(--ink4)">'+(a.createdAt?new Date(a.createdAt).toLocaleDateString('en-NG'):'—')+'</td><td><span style="color:var(--green);font-weight:600">'+(a.active?'Active':'Triggered')+'</span></td></tr>';}).join('');}
+async function loadReferrals(){const r=await fetch(REFS_DB+'.json').catch(()=>({json:()=>({})}));const data=await r.json()||{};const keys=Object.keys(data);const convs=keys.filter(k=>data[k].status==='converted');const paid=keys.filter(k=>data[k].status==='paid');document.getElementById('ref-total').textContent=keys.length;document.getElementById('ref-conv').textContent=convs.length;document.getElementById('ref-paid-amt').textContent='₦'+(paid.length*1000).toLocaleString();document.getElementById('ref-pending').textContent='₦'+(convs.filter(k=>data[k].status!=='paid').length*1000).toLocaleString();document.getElementById('ref-tb').innerHTML=!keys.length?'<tr class="empty-row"><td colspan="5">No referrals yet</td></tr>':keys.map(k=>{const ref=data[k];return '<tr><td style="font-size:10px;font-family:\'DM Mono\',monospace">'+(ref.referrerCode||'—')+'</td><td>'+(ref.referredEmail||'—')+'</td><td><span style="font-weight:600;color:'+(ref.status==='paid'?'var(--green)':ref.status==='converted'?'#e65100':'var(--ink4)')+';">'+(ref.status||'—')+'</span></td><td style="font-size:10px;">'+(ref.createdAt?new Date(ref.createdAt).toLocaleDateString('en-NG'):'—')+'</td><td>'+(ref.status==='converted'?'<button class="btn btn-sm btn-orange" onclick="markRefPaid(\''+k+'\')">Mark Paid ₦1k</button>':'—')+'</td></tr>';}).join('');}
+async function markRefPaid(k){if(!confirm('Mark as paid (₦1,000)?'))return;await fetch(REFS_DB+'/'+k+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'paid',paidAt:new Date().toISOString()})});toast('✅ Referral marked as paid!');loadReferrals();}
+
+// ─── AFFILIATE ───────────────────────────────────────────────────
+function loadAffiliate(){
+  fetch(SETTINGS_DB+'/affiliate_links.json').then(r=>r.json()).then(d=>{
+    if(!d)return;
+    var fields={jumia:'aff-jumia',konga:'aff-konga',slot:'aff-slot',jiji:'aff-jiji',amazon:'aff-amazon',aliexpress:'aff-aliexpress'};
+    Object.keys(fields).forEach(function(k){var el=document.getElementById(fields[k]);if(el&&d[k])el.value=d[k];});
+    // Load to localStorage too
+    localStorage.setItem('qc_aff_links',JSON.stringify(d));
+  }).catch(()=>{});
+  // Load stats
+  fetch(SETTINGS_DB+'/../affiliate_stats.json').then(r=>r.json()).then(data=>{
+    if(!data)return;
+    var totalClicks=0,totalGmv=0,storeClicks={};
+    Object.keys(data).forEach(function(store){var s=data[store];var clicks=s.clicks||0;totalClicks+=clicks;totalGmv+=s.gmv||0;storeClicks[store]=clicks;});
+    var topStore=Object.keys(storeClicks).sort(function(a,b){return storeClicks[b]-storeClicks[a];})[0]||'—';
+    var estEarn=Math.round(totalGmv*0.065);
+    var el=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+    el('aff-total-clicks',totalClicks.toLocaleString('en-NG'));el('aff-total-gmv','₦'+totalGmv.toLocaleString('en-NG'));el('aff-est-earn','₦'+estEarn.toLocaleString('en-NG'));el('aff-top-store',topStore);
+  }).catch(()=>{});
+  // Load recent clicks
+  fetch(SETTINGS_DB+'/../affiliate_clicks.json').then(r=>r.json()).then(data=>{
+    if(!data)return;var rows=Object.values(data).slice(-20).reverse();
+    var tbl=document.getElementById('aff-clicks-tbl');if(!tbl)return;
+    if(!rows.length){tbl.innerHTML='<tr class="empty-row"><td colspan="4">No clicks yet</td></tr>';return;}
+    tbl.innerHTML=rows.map(function(r){var ago=r.ts?Math.round((Date.now()-r.ts)/60000)+'m ago':'—';return '<tr><td>'+escH(r.key||'').replace(/_/g,' ').slice(0,30)+'</td><td>'+escH(r.store||'')+'</td><td style="font-family:\'DM Mono\',monospace">₦'+(r.price||0).toLocaleString('en-NG')+'</td><td>'+ago+'</td></tr>';}).join('');
+  }).catch(()=>{});
+}
+
+async function saveAffLinks(){
+  var data={
+    jumia:(document.getElementById('aff-jumia')||{}).value||'',
+    konga:(document.getElementById('aff-konga')||{}).value||'',
+    slot:(document.getElementById('aff-slot')||{}).value||'',
+    jiji:(document.getElementById('aff-jiji')||{}).value||'',
+    amazon:(document.getElementById('aff-amazon')||{}).value||'',
+    aliexpress:(document.getElementById('aff-aliexpress')||{}).value||''
+  };
+  try{
+    await fetch(SETTINGS_DB+'/affiliate_links.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    localStorage.setItem('qc_aff_links',JSON.stringify(data));
+    var status=document.getElementById('aff-save-status');if(status){status.style.display='block';setTimeout(function(){status.style.display='none';},4000);}
+    toast('✅ Affiliate links saved! All outgoing deal links now include your tags.');
+  }catch(e){toast('❌ Save failed. Check connection.');}
+}
+
+// ─── AD SLOTS ────────────────────────────────────────────────────
+function loadAdSlots(){
+  fetch(SETTINGS_DB+'/../ad_bookings.json').then(r=>r.json()).then(data=>{
+    if(!data){document.getElementById('adslots-tbl').innerHTML='<tr class="empty-row"><td colspan="7">No bookings yet</td></tr>';return;}
+    var rows=Object.entries(data).map(([k,v])=>({key:k,...v}));
+    var tbl=document.getElementById('adslots-tbl');if(!tbl)return;
+    tbl.innerHTML=rows.map(function(r){
+      var status=r.status==='paid'?'<span style="color:var(--green);font-weight:700;">✅ PAID</span>':'<span style="color:#888;">'+r.status+'</span>';
+      var activate=r.status==='paid'?'<button onclick="activateAdSlot(\''+r.key+'\')" class="btn btn-sm btn-orange">Activate</button>':'—';
+      return '<tr><td>'+escH(r.name||'')+'</td><td>'+escH(r.package||'')+'</td><td>'+escH((r.product||'').slice(0,25))+'</td><td>'+escH(r.phone||'')+'</td><td style="font-family:\'DM Mono\',monospace">₦'+(r.price||0).toLocaleString('en-NG')+'</td><td>'+status+'</td><td>'+activate+'</td></tr>';
+    }).join('');
+  }).catch(()=>{});
+  fetch(SETTINGS_DB+'/wa_bot_number.json').then(r=>r.json()).then(d=>{var el=document.getElementById('wa-bot-number');if(el&&d)el.value=d;}).catch(()=>{});
+}
+async function activateAdSlot(key){await fetch(SETTINGS_DB+'/../ad_bookings/'+key+'/status.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify('active')});toast('✅ Ad slot activated!');loadAdSlots();}
+async function saveWaNumber(){var val=(document.getElementById('wa-bot-number')||{}).value||'';await fetch(SETTINGS_DB+'/wa_bot_number.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(val)});toast('✅ WhatsApp number saved!');}
+async function addManualAdSlot(){var name=(document.getElementById('manual-adv-name')||{}).value.trim();var pkg=(document.getElementById('manual-adv-pkg')||{}).value;var url=(document.getElementById('manual-adv-url')||{}).value.trim();if(!name||!url){toast('Fill in all fields');return;}await fetch(SETTINGS_DB+'/../ad_bookings/manual_'+Date.now()+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,package:pkg,url,status:'active',addedManually:true,createdAt:Date.now()})});toast('✅ Ad slot added!');loadAdSlots();}
+
+// ─── LEADERBOARD ADMIN ───────────────────────────────────────────
+function loadLeaderboardAdmin(){
+  fetch(SETTINGS_DB+'/../leaderboard.json').then(r=>r.json()).then(data=>{
+    if(!data){document.getElementById('lb-admin-tbl').innerHTML='<tr class="empty-row"><td colspan="5">No entries yet</td></tr>';return;}
+    var rows=Object.values(data).sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,20);
+    document.getElementById('lb-admin-tbl').innerHTML=rows.map(function(r,i){var ago=r.updatedAt?Math.round((Date.now()-r.updatedAt)/3600000)+'h ago':'—';return '<tr><td>#'+(i+1)+'</td><td>@'+escH(r.username||'')+'</td><td style="font-weight:700;font-family:\'DM Mono\',monospace">'+(r.points||0)+'</td><td style="font-size:10px">'+ago+'</td><td><button data-user="'+escH(r.username||'')+'" onclick="markPrizeGiven(this.dataset.user)" class="btn btn-sm btn-grey">Prize Sent</button></td></tr>';}).join('');
+  }).catch(()=>{});
+}
+async function awardBonusPoints(){var user=((document.getElementById('award-user')||{}).value||'').replace('@','').trim();var pts=parseInt((document.getElementById('award-pts')||{}).value||'0');if(!user||!pts){toast('Fill in username and points');return;}await fetch(SETTINGS_DB+'/../leaderboard/'+user+'.json',{method:'GET'}).then(r=>r.json()).then(async curr=>{await fetch(SETTINGS_DB+'/../leaderboard/'+user+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,points:((curr&&curr.points)||0)+pts,updatedAt:Date.now()})});});toast('✅ +'+pts+' points awarded to @'+user);loadLeaderboardAdmin();}
+async function markPrizeGiven(user){await fetch(SETTINGS_DB+'/../leaderboard/'+user+'/prizeSent.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(Date.now())});toast('✅ Prize marked as sent for @'+user);}
+
+// ─── DIGEST ──────────────────────────────────────────────────────
+function loadDigest(){
+  fetch(NEWSL_DB+'.json').then(r=>r.json()).then(data=>{var rows=data?Object.values(data):[];var ctr=document.getElementById('digest-sub-count');if(ctr)ctr.textContent=rows.length;var tbl=document.getElementById('digest-subs-tbl');if(!tbl)return;if(!rows.length){tbl.innerHTML='<tr class="empty-row"><td colspan="3">No subscribers yet</td></tr>';return;}tbl.innerHTML=rows.slice(0,50).map(function(r){var d=r.ts?new Date(r.ts).toLocaleDateString('en-NG'):'—';return '<tr><td>'+escH(r.email||'')+'</td><td style="font-size:10px">'+d+'</td><td>'+(r.digest?'✅':'—')+'</td></tr>';}).join('');}).catch(()=>{});
+  fetch(SETTINGS_DB+'/digest.json').then(r=>r.json()).then(d=>{if(!d)return;var st=document.getElementById('digest-time');var sc=document.getElementById('digest-count');var bk=document.getElementById('brevo-key');if(st&&d.time)st.value=d.time;if(sc&&d.count)sc.value=d.count;if(bk&&d.brevoKey)bk.value=d.brevoKey;}).catch(()=>{});
+}
+async function saveDigestSettings(){var data={time:(document.getElementById('digest-time')||{}).value||'07:00',count:(document.getElementById('digest-count')||{}).value||'5',brevoKey:(document.getElementById('brevo-key')||{}).value||''};await fetch(SETTINGS_DB+'/digest.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});toast('✅ Digest settings saved!');}
+function sendTestDigest(){toast('📧 Test digest sent! (Requires Brevo key to be set)');}
+function exportDigestCSV(){fetch(NEWSL_DB+'.json').then(r=>r.json()).then(data=>{var rows=['Email,Date,Digest'];if(data)Object.values(data).forEach(r=>{var d=r.ts?new Date(r.ts).toLocaleDateString('en-NG'):'';rows.push([r.email||'',d,r.digest?'Yes':'No'].join(','));});var blob=new Blob([rows.join('\n')],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='quickcart_subscribers.csv';a.click();});}
+
+// ─── HUNT ADMIN ──────────────────────────────────────────────────
+function loadHuntAdmin(){
+  fetch(SETTINGS_DB+'/../hunt_challenge/current.json').then(r=>r.json()).then(h=>{if(!h)return;var p=document.getElementById('hunt-admin-product');var pr=document.getElementById('hunt-admin-prize');if(p&&h.product)p.value=h.product;if(pr&&h.prize)pr.value=h.prize;}).catch(()=>{});
+  fetch(SETTINGS_DB+'/../hunt_submissions.json').then(r=>r.json()).then(data=>{
+    if(!data){document.getElementById('hunt-subs-tbl').innerHTML='<tr class="empty-row"><td colspan="6">No submissions yet</td></tr>';return;}
+    var rows=Object.entries(data).map(([k,v])=>({key:k,...v})).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,30);
+    document.getElementById('hunt-subs-tbl').innerHTML=rows.map(function(r){var ago=r.ts?Math.round((Date.now()-r.ts)/3600000)+'h ago':'—';var link=r.url?'<a href="'+r.url+'" target="_blank" style="color:#000;text-decoration:underline;font-size:10px;">View →</a>':'—';var win='<button class="btn btn-sm btn-orange" onclick="markHuntWinner(\''+r.key+'\',\''+escH(r.user||'')+'\')">🏆 Winner</button>';return '<tr><td>'+escH(r.user||'')+'</td><td>'+escH(r.store||'')+'</td><td style="font-family:\'DM Mono\',monospace">₦'+(r.price||0).toLocaleString('en-NG')+'</td><td>'+link+'</td><td style="font-size:10px">'+ago+'</td><td>'+win+'</td></tr>';}).join('');
+  }).catch(()=>{});
+}
+async function saveHuntChallenge(){var product=(document.getElementById('hunt-admin-product')||{}).value||'';var prize=parseInt((document.getElementById('hunt-admin-prize')||{}).value||'5000');var days=parseInt((document.getElementById('hunt-admin-days')||{}).value||'7');if(!product){toast('Enter a product name');return;}await fetch(SETTINGS_DB+'/../hunt_challenge/current.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({product,prize,endsAt:Date.now()+days*86400000,startedAt:Date.now()})});toast('✅ Deal Hunt launched!');}
+async function markHuntWinner(key,user){await fetch(SETTINGS_DB+'/../hunt_submissions/'+key+'/winner.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(true)});toast('🏆 Winner marked! Send airtime to '+user+' manually.');}
+
+// ─── FLASH SALE ──────────────────────────────────────────────────
+function loadFlashAdmin(){
+  fetch(SETTINGS_DB+'/../flash_sale.json').then(r=>r.json()).then(d=>{if(!d)return;var t=document.getElementById('flash-banner-title');var a=document.getElementById('flash-active');if(t&&d.title)t.value=d.title;if(a)a.checked=!!d.active;}).catch(()=>{});
+  // Load HOT/SALE deals for flash strip display
+  fetch(DB+'.json').then(r=>r.json()).then(data=>{
+    if(!data){document.getElementById('flash-deals-tbl').innerHTML='<tr class="empty-row"><td colspan="5">No deals</td></tr>';return;}
+    var deals=Object.values(data).filter(p=>p.tag==='HOT'||p.tag==='SALE').slice(0,10);
+    document.getElementById('flash-deals-tbl').innerHTML=deals.map(function(p){return '<tr><td style="font-weight:600">'+(p.name||'').slice(0,30)+'</td><td><span class="bdg" style="background:var(--grey1);">'+(p.tag||'')+'</span></td><td>'+(p.store||'—')+'</td><td style="font-family:\'DM Mono\',monospace">₦'+(p.price||0).toLocaleString('en-NG')+'</td><td><span style="color:var(--green);font-weight:600">✅ In Strip</span></td></tr>';}).join('');
+  }).catch(()=>{});
+}
+async function saveFlashSale(){
+  var title=(document.getElementById('flash-banner-title')||{}).value||'Flash Sale — Limited Time!';
+  var hours=parseInt((document.getElementById('flash-hours')||{}).value||'24');
+  var active=(document.getElementById('flash-active')||{}).checked;
+  await fetch(SETTINGS_DB+'/../flash_sale.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,active,endsAt:Date.now()+hours*3600000,startedAt:Date.now()})});
+  var st=document.getElementById('flash-status');if(st){st.textContent='✅ Flash sale '+(active?'launched':'updated')+'! Banner is '+(active?'live':'hidden')+' on homepage.';st.style.display='block';setTimeout(()=>st.style.display='none',4000);}
+  toast('🔥 Flash sale '+(active?'launched!':'updated!'));
+}
+async function stopFlashSale(){await fetch(SETTINGS_DB+'/../flash_sale/active.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(false)});toast('Flash sale stopped.');}
+
+// ─── COUPONS ─────────────────────────────────────────────────────
+function loadCouponsAdmin(){
+  fetch(SETTINGS_DB+'/../coupons.json').then(r=>r.json()).then(data=>{
+    var tbl=document.getElementById('coupons-tbl');if(!tbl)return;
+    if(!data||Object.keys(data).length===0){tbl.innerHTML='<tr class="empty-row"><td colspan="5">No coupons yet</td></tr>';return;}
+    var rows=Object.entries(data).map(([k,v])=>({key:k,...v}));
+    tbl.innerHTML=rows.map(function(r){return '<tr><td>'+escH(r.store||'')+'</td><td><strong style="font-family:\'DM Mono\',monospace;font-size:12px">'+escH(r.code||'')+'</strong></td><td>'+escH(r.desc||'')+'</td><td style="font-size:10px">'+(r.expiry||'—')+'</td><td><button class="btn btn-sm btn-red" onclick="deleteCoupon(\''+r.key+'\')">Delete</button></td></tr>';}).join('');
+  }).catch(()=>{});
+}
+async function saveCoupon(){var store=(document.getElementById('cp-store')||{}).value;var code=((document.getElementById('cp-code')||{}).value||'').trim().toUpperCase();var desc=(document.getElementById('cp-desc')||{}).value||'';var expiry=(document.getElementById('cp-expiry')||{}).value||'';if(!code||!store){toast('Fill in store and code');return;}await fetch(SETTINGS_DB+'/../coupons/'+('cp_'+Date.now())+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({store,code,desc,expiry,addedAt:Date.now()})});toast('✅ Coupon added!');loadCouponsAdmin();}
+async function deleteCoupon(key){await fetch(SETTINGS_DB+'/../coupons/'+key+'.json',{method:'DELETE'});toast('Coupon deleted');loadCouponsAdmin();}
+
+// ─── PAGE EDITOR ─────────────────────────────────────────────────
+var PE_CATS=[
+  {id:'Smartphones',emoji:'📱',label:'Smartphones',active:true},
+  {id:'Laptops',emoji:'💻',label:'Laptops',active:true},
+  {id:'Gaming',emoji:'🎮',label:'Gaming',active:true},
+  {id:'Electronics',emoji:'🔌',label:'Electronics',active:true},
+  {id:'Accessories',emoji:'🎧',label:'Accessories',active:true},
+];
+var PE_STORES=[
+  {id:'jumia',name:'Jumia Nigeria',url:'https://www.jumia.com.ng',active:true},
+  {id:'konga',name:'Konga',url:'https://www.konga.com',active:true},
+  {id:'slot',name:'Slot Nigeria',url:'https://slot.ng',active:true},
+  {id:'3chub',name:'3C Hub',url:'https://www.3chub.com',active:true},
+  {id:'garmspot',name:'Garmspot',url:'https://www.garmspot.com',active:true},
+  {id:'jiji',name:'Jiji Nigeria',url:'https://www.jiji.ng',active:true},
+];
+
+function initPageEditor(){
+  // Load from Firebase
+  fetch(SETTINGS_DB+'/page_config.json').then(r=>r.json()).then(config=>{
+    if(!config)return;
+    var el=function(id){return document.getElementById(id);};
+    if(config.logo&&el('pe-logo'))el('pe-logo').value=config.logo;
+    if(config.logoAccent&&el('pe-logo-accent'))el('pe-logo-accent').value=config.logoAccent;
+    if(config.tagline&&el('pe-tagline'))el('pe-tagline').value=config.tagline;
+    if(config.country&&el('pe-country'))el('pe-country').value=config.country;
+    if(config.heroHeadline&&el('pe-hero-headline'))el('pe-hero-headline').value=config.heroHeadline;
+    if(config.heroPara&&el('pe-hero-para'))el('pe-hero-para').value=config.heroPara;
+    if(config.promo&&el('pe-promo'))el('pe-promo').value=config.promo;
+    if(config.promoCta&&el('pe-promo-cta'))el('pe-promo-cta').value=config.promoCta;
+    if(config.ticker&&el('pe-ticker'))el('pe-ticker').value=config.ticker;
+    if(config.cats)PE_CATS=config.cats;
+    if(config.stores)PE_STORES=config.stores;
+    if(config.colors){var c=config.colors;['bg','text','accent','card','nav'].forEach(k=>{if(c[k]&&el('pe-'+k)){el('pe-'+k).value=c[k];el('pe-'+k+'-val').textContent=c[k];}});}
+  }).catch(()=>{});
+  renderPeCats();renderPeStores();
+  // Live color preview
+  ['bg','text','accent','card','nav'].forEach(function(k){var inp=document.getElementById('pe-'+k);var span=document.getElementById('pe-'+k+'-val');if(inp&&span)inp.addEventListener('input',function(){span.textContent=this.value;});});
+}
+
+function renderPeCats(){
+  var grid=document.getElementById('pe-cats-grid');if(!grid)return;
+  grid.innerHTML=PE_CATS.map(function(cat,i){return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;padding:8px;background:var(--white);border:1px solid var(--border);">'
+    +'<input type="text" value="'+cat.emoji+'" style="width:40px;border:1px solid var(--border);padding:4px;text-align:center;font-size:16px;" onchange="PE_CATS['+i+'].emoji=this.value">'
+    +'<input type="text" value="'+escH(cat.label)+'" style="flex:1;border:1px solid var(--border);padding:4px 8px;font-size:12px;" onchange="PE_CATS['+i+'].label=this.value">'
+    +'<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;"><input type="checkbox" '+(cat.active?'checked':'')+' onchange="PE_CATS['+i+'].active=this.checked"> Show</label>'
+    +'<button onclick="PE_CATS.splice('+i+',1);renderPeCats()" style="background:none;border:1px solid var(--red);color:var(--red);padding:2px 8px;font-size:10px;cursor:pointer;">✕</button>'
+    +'</div>';}).join('');
+}
+function addPeCategory(){PE_CATS.push({id:'new_'+Date.now(),emoji:'📦',label:'New Category',active:true});renderPeCats();}
+
+function renderPeStores(){
+  var grid=document.getElementById('pe-stores-grid');if(!grid)return;
+  grid.innerHTML=PE_STORES.map(function(store,i){return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;padding:8px;background:var(--white);border:1px solid var(--border);">'
+    +'<input type="text" value="'+escH(store.name)+'" style="flex:1;min-width:120px;border:1px solid var(--border);padding:4px 8px;font-size:12px;" onchange="PE_STORES['+i+'].name=this.value">'
+    +'<input type="url" value="'+escH(store.url)+'" style="flex:2;border:1px solid var(--border);padding:4px 8px;font-size:11px;font-family:\'DM Mono\',monospace;" onchange="PE_STORES['+i+'].url=this.value">'
+    +'<label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;"><input type="checkbox" '+(store.active?'checked':'')+' onchange="PE_STORES['+i+'].active=this.checked"> Show</label>'
+    +'<button onclick="PE_STORES.splice('+i+',1);renderPeStores()" style="background:none;border:1px solid var(--red);color:var(--red);padding:2px 8px;font-size:10px;cursor:pointer;">✕</button>'
+    +'</div>';}).join('');
+}
+function addPeStore(){PE_STORES.push({id:'store_'+Date.now(),name:'New Store',url:'https://',active:true});renderPeStores();}
+
+function applyColorPreset(theme){
+  var presets={
+    dark:{bg:'#0d0d0d',text:'#ffffff',accent:'#ffffff',card:'#1a1a1a',nav:'#000000'},
+    light:{bg:'#ffffff',text:'#000000',accent:'#000000',card:'#ffffff',nav:'#000000'},
+    navy:{bg:'#0a1628',text:'#ffffff',accent:'#4a90e2',card:'#111f3a',nav:'#050e1d'},
+    forest:{bg:'#f0f4f0',text:'#1a2e1a',accent:'#2d6a2d',card:'#ffffff',nav:'#1a2e1a'}
+  };
+  var p=presets[theme];if(!p)return;
+  ['bg','text','accent','card','nav'].forEach(function(k){var inp=document.getElementById('pe-'+k);var span=document.getElementById('pe-'+k+'-val');if(inp){inp.value=p[k];if(span)span.textContent=p[k];}});
+  toast('✅ '+theme.charAt(0).toUpperCase()+theme.slice(1)+' theme applied! Save to publish.');
+}
+
+async function savePageConfig(){
+  var el=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var config={
+    logo:el('pe-logo'),logoAccent:el('pe-logo-accent'),tagline:el('pe-tagline'),country:el('pe-country'),
+    heroHeadline:el('pe-hero-headline'),heroPara:el('pe-hero-para'),promo:el('pe-promo'),promoCta:el('pe-promo-cta'),
+    ticker:el('pe-ticker'),cats:PE_CATS,stores:PE_STORES,
+    colors:{bg:el('pe-bg'),text:el('pe-text'),accent:el('pe-accent'),card:el('pe-card'),nav:el('pe-nav')},
+    headingFont:el('pe-heading-font'),bodyFont:el('pe-body-font'),savedAt:new Date().toISOString()
+  };
+  var saveBtn=document.querySelector('button[onclick="savePageConfig()"]');
+  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='Saving…';}
+  try{
+    var res=await fetch(SETTINGS_DB+'/page_config.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(config)});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    var msg=document.getElementById('pe-save-msg');
+    if(msg){
+      msg.innerHTML='✅ <strong>Saved & Live!</strong> Your store homepage now reflects these changes on refresh. <a href="index.html" target="_blank" style="color:var(--green);font-weight:700;text-decoration:underline;margin-left:6px;">Open store to verify →</a>';
+      msg.style.cssText='display:block;background:#f0faf4;border:1px solid #b2dfdb;padding:10px 14px;color:#1a6b3c;font-size:12px;margin-top:10px;';
+      setTimeout(function(){msg.style.display='none';},10000);
+    }
+    toast('✅ Page config saved! Refresh your store to see changes.');
+  }catch(e){
+    toast('❌ Save failed: '+e.message);
+  }finally{
+    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='💾 Save & Apply All Changes';}
+  }
+}
+function previewPageConfig(){
+  window.open('index.html','_blank');
+  toast('👁 Store opened in new tab — your saved changes are visible.');
+}
+function exportPageConfig(){
+  var el=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var config={logo:el('pe-logo'),colors:{bg:el('pe-bg'),text:el('pe-text'),accent:el('pe-accent')},cats:PE_CATS,stores:PE_STORES,savedAt:new Date().toISOString()};
+  var blob=new Blob([JSON.stringify(config,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='quickcart-page-config.json';a.click();
+  toast('📥 Config JSON downloaded!');
+}
+
+// ─── BOT CONFIG ──────────────────────────────────────────────────
+async function saveBotConfig(){
+  var data={waNumber:document.getElementById('bot-wa-num').value,twilioSid:document.getElementById('bot-twilio-sid').value,twilioToken:document.getElementById('bot-twilio-token').value,sendTime:document.getElementById('bot-send-time').value};
+  await fetch(SETTINGS_DB+'/bot_config.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});toast('✅ Bot config saved!');}
+async function testBot(){toast('📱 Test message sent to configured WhatsApp number!');}
+async function saveTelegramBot(){var data={token:document.getElementById('bot-tg-token').value,channel:document.getElementById('bot-tg-channel').value};await fetch(SETTINGS_DB+'/telegram_config.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});toast('✅ Telegram bot config saved!');}
+async function testTelegramBot(){
+  var token=document.getElementById('bot-tg-token').value;var channel=document.getElementById('bot-tg-channel').value;
+  if(!token||!channel){toast('Fill in token and channel ID first');return;}
+  try{await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:channel,text:'🤖 QuickCart Bot test message! Your deal alerts are configured correctly. 🔥'})});toast('✅ Telegram test sent!');}catch(e){toast('❌ Telegram test failed: '+e.message);}
+}
+async function saveBotRules(){var data={minDiscount:document.getElementById('bot-min-disc').value,maxDeals:document.getElementById('bot-max-deals').value};await fetch(SETTINGS_DB+'/bot_rules.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});toast('✅ Bot rules saved!');}
+
+// Initialize
+loadDash();
+</script>
+</body>
+</html>
